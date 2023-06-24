@@ -39,7 +39,9 @@ for (const pkg of packages) {
       // package.json properties
       name: pkg.replace("nifty-lil-tricks-", "@nifty-lil-tricks/"),
       version: VERSION,
-      description: "TODO",
+      description:
+        "A selection of useful utilities (or nifty li'l tricks!) for all things testing",
+      author: "Jonny Green <hello@jonnydgreen.com>",
       license: "MIT",
       repository: {
         type: "git",
@@ -47,6 +49,15 @@ for (const pkg of packages) {
       },
       bugs: {
         url: "https://github.com/jonnydgreen/nifty-lil-tricks-testing/issues",
+      },
+      homepage: "https://github.com/jonnydgreen/nifty-lil-tricks-testing",
+      keywords: [
+        "testing",
+        "deno",
+        "nodejs",
+      ],
+      engines: {
+        node: ">=18",
       },
     },
     async postBuild() {

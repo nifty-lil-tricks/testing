@@ -95,3 +95,17 @@ jobs:
 
       - name: Check non-test assertions
         run: deno task lint:check-assertions
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: vx.x.x
+
+      - name: Build npm
+        run: deno task build

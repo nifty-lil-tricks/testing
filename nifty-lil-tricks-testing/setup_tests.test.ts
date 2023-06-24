@@ -3,12 +3,13 @@
 import { beforeEach, describe, it } from "std/testing/bdd.ts";
 import { assertEquals } from "std/testing/asserts.ts";
 import { setupTestsFactory } from "./setup_tests.ts";
-import type { SetupTestsFn } from "./setup_tests.type.ts";
+import type { SetupTestsFn, SetupTestsLoader } from "./setup_tests.type.ts";
 
 describe("setupTestsFactory", () => {
   let setupTests: SetupTestsFn<Loaders>;
 
   beforeEach(() => {
+    teardownCalls = [];
     const { setupTests: setupTestsFn } = setupTestsFactory({
       loader1,
       loader2,
@@ -48,25 +49,77 @@ describe("setupTestsFactory", () => {
       });
     });
   });
+
+  describe("teardown", () => {
+    it("should run the teardown function of activated loaders", async () => {
+      // Arrange
+      const loader1Config: Loader1Config = { data1: ["1"] };
+      const loader2Config: Loader2Config = { data2: [2] };
+      const { teardown } = await setupTests({
+        loader1: loader1Config,
+        loader2: loader2Config,
+      });
+
+      // Act
+      await teardown();
+
+      // Assert
+      assertEquals(teardownCalls, ["loader2.teardown", "loader1.teardown"]);
+    });
+
+    it("should run the teardown function of all loaders when all loaders are activated", async () => {
+      // Arrange
+      const loader1Config: Loader1Config = { data1: ["1"] };
+      const { teardown } = await setupTests({
+        loader1: loader1Config,
+      });
+
+      // Act
+      await teardown();
+
+      // Assert
+      assertEquals(teardownCalls, ["loader1.teardown"]);
+    });
+  });
 });
 
 type Loaders = {
-  loader1: (input: Loader1Config) => Promise<{ loader1Result: Loader1Config }>;
-  loader2: (input: Loader2Config) => Promise<{ loader2Result: Loader2Config }>;
+  loader1: SetupTestsLoader<Loader1Config, Loader1Result>;
+  loader2: SetupTestsLoader<Loader2Config, Loader2Result>;
 };
 
 interface Loader1Config {
   data1: string[];
 }
 
+interface Loader1Result {
+  loader1Result: Loader1Config;
+}
+
 interface Loader2Config {
   data2: number[];
 }
 
-function loader1(input: Loader1Config) {
-  return { loader1Result: input };
+interface Loader2Result {
+  loader2Result: Loader2Config;
 }
 
-async function loader2(input: Loader2Config) {
-  return await Promise.resolve({ loader2Result: input });
-}
+let teardownCalls: string[] = [];
+
+const loader1: SetupTestsLoader<Loader1Config, Loader1Result> = {
+  setup(input: Loader1Config) {
+    return { loader1Result: input };
+  },
+  teardown() {
+    teardownCalls.push("loader1.teardown");
+  },
+};
+
+const loader2: SetupTestsLoader<Loader2Config, Loader2Result> = {
+  setup(input: Loader2Config) {
+    return { loader2Result: input };
+  },
+  teardown() {
+    teardownCalls.push("loader2.teardown");
+  },
+};

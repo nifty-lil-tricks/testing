@@ -3,55 +3,84 @@
 import type {
   SetupTestsBaseConfig,
   SetupTestsConfig,
-  SetupTestsFactoryConfig,
+  SetupTestsFactoryLoaders,
   SetupTestsFactoryResult,
   SetupTestsLoaders,
+  SetupTestsLoaderTeardown,
   SetupTestsResult,
+  SetupTestsTeardown,
 } from "./setup_tests.type.ts";
 
-// TODO: make into a class but this is fine for now
 export function setupTestsFactory<TLoaders extends SetupTestsLoaders>(
-  loadersConfig: SetupTestsFactoryConfig<TLoaders>,
+  loaders: SetupTestsFactoryLoaders<TLoaders>,
 ): SetupTestsFactoryResult<TLoaders> {
+  const service = new SetupTestsService(loaders);
   return {
-    setupTests: <TConfig extends SetupTestsConfig<TLoaders>>(
-      config: TConfig,
-    ): Promise<SetupTestsResult<TLoaders, TConfig>> =>
-      setupTests(loadersConfig, config),
+    setupTests: service.setupTests.bind(service),
   };
 }
 
-async function setupTests<
-  TLoaders extends SetupTestsLoaders,
-  TConfig extends SetupTestsConfig<TLoaders>,
->(
-  loaders: SetupTestsFactoryConfig<TLoaders>,
-  config: TConfig,
-): Promise<SetupTestsResult<TLoaders, TConfig>> {
-  const results = { data: {} };
+class SetupTestsService<TLoaders extends SetupTestsLoaders>
+  implements SetupTestsFactoryResult<TLoaders> {
+  #loaders: SetupTestsFactoryLoaders<TLoaders>;
 
-  const { ...loadersConfig } = config;
-  for (const [loaderName, loaderConfig] of Object.entries(loadersConfig)) {
-    assertAllowedLoaderName(loaderName);
-    const loader = loaders[loaderName];
-    const result = await loader(loaderConfig);
-    results.data = {
-      ...results.data,
-      [loaderName]: result,
+  constructor(loaders: SetupTestsFactoryLoaders<TLoaders>) {
+    this.#loaders = loaders;
+  }
+
+  #buildLoaderTeardown<TConfig, TResult>(
+    loaderName: string,
+    config: TConfig,
+    result: TResult,
+  ): SetupTestsLoaderTeardown {
+    const loader = this.#loaders[loaderName];
+    return () => {
+      return loader.teardown(config, result);
     };
   }
 
-  return results as SetupTestsResult<TLoaders, typeof config>;
+  #buildTeardown(teardowns: SetupTestsLoaderTeardown[]): SetupTestsTeardown {
+    return async () => {
+      for (const teardown of teardowns) {
+        await teardown();
+      }
+    };
+  }
+
+  async setupTests<TConfig extends SetupTestsConfig<TLoaders>>(
+    config: TConfig,
+  ): Promise<SetupTestsResult<TLoaders, TConfig>> {
+    let data = {};
+    const teardowns: SetupTestsLoaderTeardown[] = [];
+    const { ...loadersConfig } = config;
+    for (const [loaderName, loaderConfig] of Object.entries(loadersConfig)) {
+      assertAllowedLoaderName(loaderName);
+      const loader = this.#loaders[loaderName];
+      const result = await loader.setup(loaderConfig);
+      data = {
+        ...data,
+        [loaderName]: result,
+      };
+      teardowns.push(
+        this.#buildLoaderTeardown(loaderName, loaderConfig, result),
+      );
+    }
+
+    return {
+      data: data as SetupTestsResult<TLoaders, TConfig>["data"],
+      teardown: this.#buildTeardown(teardowns.reverse()).bind(this),
+    };
+  }
 }
 
-export function assertAllowedLoaderName(loaderName: string): void {
+function assertAllowedLoaderName(loaderName: string): void {
   const bannedLoaderNames: Record<keyof SetupTestsBaseConfig, string> = {};
   if (
     Object.keys(bannedLoaderNames).includes(
       loaderName as keyof SetupTestsBaseConfig,
     )
   ) {
-    throw new Error(
+    throw new SetupTestsError(
       `'${loaderName}' is a reserved loader name, please choose another name that is not one of ${
         Object.keys(bannedLoaderNames).join("|")
       }`,

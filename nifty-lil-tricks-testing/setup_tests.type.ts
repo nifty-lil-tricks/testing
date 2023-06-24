@@ -1,6 +1,9 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-export type SetupTestsLoader<I, R> = (input: I) => R | Promise<R>;
+export type SetupTestsLoader<I, R> = {
+  setup: (config: I) => R | Promise<R>;
+  teardown: (config: I, result: R) => void | Promise<void>;
+};
 
 // This is an acceptable use of any because it's only used in the type signature
 // deno-lint-ignore no-explicit-any
@@ -12,7 +15,7 @@ export interface SetupTestsBaseConfig {}
 
 export type SetupTestsConfig<TLoaders extends SetupTestsLoaders> =
   & Omit<
-    { [K in keyof TLoaders]?: Parameters<TLoaders[K]>[0] },
+    { [K in keyof TLoaders]?: Parameters<TLoaders[K]["setup"]>[0] },
     keyof SetupTestsBaseConfig
   >
   & SetupTestsBaseConfig;
@@ -23,16 +26,21 @@ export type SetupTestsResult<
 > = {
   data: {
     [K in Extract<keyof TLoaders, DefinedKeys<TConfig>>]: Awaited<
-      ReturnType<TLoaders[K]>
+      ReturnType<TLoaders[K]["setup"]>
     >;
   };
+  teardown: SetupTestsTeardown;
 };
+
+export type SetupTestsLoaderTeardown = () => void | Promise<void>;
+
+export type SetupTestsTeardown = () => Promise<void>;
 
 export type DefinedKeys<T> = {
   [K in keyof T]-?: undefined extends T[K] ? never : K;
 }[keyof T];
 
-export type SetupTestsFactoryConfig<TLoaders extends SetupTestsLoaders> = {
+export type SetupTestsFactoryLoaders<TLoaders extends SetupTestsLoaders> = {
   [K in keyof TLoaders]: TLoaders[K];
 };
 
