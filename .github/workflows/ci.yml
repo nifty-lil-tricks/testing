@@ -36,26 +36,25 @@ jobs:
       #   shell: bash
       #   run: deno task test:browser
 
-      # TODO: add later
-      # - name: Generate lcov
-      #   shell: bash
-      #   # excludes tests, testdata, and generated sources from coverage report
-      #   run: |
-      #     deno coverage ./cov/ --lcov --exclude="test\\.(ts|js)|wasm\\.js|testdata" > cov.lcov
+      - name: Generate lcov
+        shell: bash
+        # excludes tests, testdata, and generated sources from coverage report
+        run: |
+          deno coverage ./cov/ --lcov --exclude="test\\.(ts|js)|wasm\\.js|testdata" > cov.lcov
 
-      # TODO: add later
-      # - name: Upload coverage
-      #   uses: codecov/codecov-action@v3
-      #   with:
-      #     name: ${{ matrix.os }}-${{ matrix.deno }}
-      #     files: cov.lcov
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          name: ${{ matrix.os }}-${{ matrix.deno }}
+          files: cov.lcov
 
-      # TODO: add later
-      # - name: Remove coverage report
-      #   shell: bash
-      #   run: |
-      #     rm -rf ./cov/
-      #     rm cov.lcov
+      - name: Remove coverage report
+        shell: bash
+        run: |
+          rm -rf ./cov/
+          rm cov.lcov
 
       # TODO: add later
       # - name: Release if version change
