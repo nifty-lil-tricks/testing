@@ -10,18 +10,11 @@ import { toFileUrl } from "std/path/mod.ts";
 const EXTENSIONS = [".mjs", ".js", ".ts"];
 const EXCLUDED_PATHS = [
   ".git",
-  "dotenv/testdata",
-  "fs/testdata",
-  "http/testdata",
-  "http/_negotiation",
-  "crypto/_wasm",
-  "crypto/_fnv",
-  "encoding/_yaml",
-  "encoing/_toml",
   "_tools",
   "_util",
   "node_modules",
   "npm",
+  "testing",
   "examples/nifty-lil-tricks-testing-nodejs",
   "scripts",
 ];

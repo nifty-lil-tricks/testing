@@ -9,3 +9,5 @@ npm/
 node_modules/
 .nyc_output/
 package-lock.json
+cov.lcov
+html_cov
