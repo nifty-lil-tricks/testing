@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "useUnknownInCatchVariables": true,
+    "noImplicitOverride": true
+  },
+  "fmt": {
+    "exclude": [
+      ".git",
+      "cov",
+      "**/.nyc_output",
+      "**/npm",
+      "**/node_modules"
+    ]
+  },
+  "importMap": "./test_import_map.json",
+  "lint": {
+    "exclude": [
+      ".git",
+      "cov",
+      "**/.nyc_output",
+      "**/npm",
+      "**/node_modules",
+      "examples/nifty-lil-tricks-testing-nodejs"
+    ]
+  },
+  "test": {
+    "exclude": [
+      "examples"
+    ]
+  },
+  "tasks": {
+    "test": "deno test --doc --allow-all --coverage=./cov",
+    "test:browser": "git grep --name-only \"This module is browser compatible.\" | grep -v deno.json | grep -v .github/workflows | grep -v _tools | xargs deno check --config browser-compat.tsconfig.json",
+    "fmt:licence-headers": "deno run --allow-read --allow-write ./_tools/check_licence.ts",
+    "lint:deprecations": "deno run --allow-read --allow-net ./_tools/check_deprecations.ts",
+    "lint:doc-imports": "deno run --allow-env --allow-read ./_tools/check_doc_imports.ts",
+    "lint:check-assertions": "deno run --allow-read --allow-net ./_tools/check_assertions.ts",
+    "lint": "deno lint && deno fmt --check && deno task fmt:licence-headers --check && deno task lint:deprecations && deno task lint:doc-imports && deno task lint:check-assertions",
+    "pre-commit": "deno task lint && deno task test && deno task build",
+    "build": "deno run -A scripts/build_npm.ts"
+  }
+}

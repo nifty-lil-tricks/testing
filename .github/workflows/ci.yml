@@ -1,0 +1,98 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        deno: [v1.x]
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macOS-latest
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: ${{ matrix.deno }}
+
+      - name: Run tests
+        run: deno task test
+
+      # TODO: add later
+      # - name: Type check browser compatible modules
+      #   shell: bash
+      #   run: deno task test:browser
+
+      # TODO: add later
+      # - name: Generate lcov
+      #   shell: bash
+      #   # excludes tests, testdata, and generated sources from coverage report
+      #   run: |
+      #     deno coverage ./cov/ --lcov --exclude="test\\.(ts|js)|wasm\\.js|testdata" > cov.lcov
+
+      # TODO: add later
+      # - name: Upload coverage
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     name: ${{ matrix.os }}-${{ matrix.deno }}
+      #     files: cov.lcov
+
+      # TODO: add later
+      # - name: Remove coverage report
+      #   shell: bash
+      #   run: |
+      #     rm -rf ./cov/
+      #     rm cov.lcov
+
+      # TODO: add later
+      # - name: Release if version change
+      #   if: |
+      #     matrix.os == 'ubuntu-latest' &&
+      #     github.repository == 'denoland/deno_std' &&
+      #     github.ref == 'refs/heads/main'
+      #   shell: bash
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.JONNYDGREEN_BOT_PAT }}
+      #   run: ./_tools/release/03_release.ts
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: vx.x.x
+
+      - name: Format
+        run: deno fmt --check
+
+      - name: Lint
+        run: deno lint
+
+      - name: Check License headers
+        run: deno task fmt:licence-headers --check
+
+      - name: Check Deprecations
+        run: "deno task lint:deprecations"
+
+      - name: Check Import paths in Docs
+        run: "deno task lint:doc-imports"
+
+      - name: Check non-test assertions
+        run: deno task lint:check-assertions

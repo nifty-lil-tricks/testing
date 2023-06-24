@@ -1,0 +1,11 @@
+.DS_Store
+.idea
+.vscode/settings.json
+.vim
+**/cov/
+deno.lock
+.tool-versions
+npm/
+node_modules/
+.nyc_output/
+package-lock.json
