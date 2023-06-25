@@ -17,6 +17,7 @@ const EXCLUDED_PATHS = [
   "testing",
   "examples/nifty-lil-tricks-testing-nodejs",
   "scripts",
+  "\.test.ts",
 ];
 
 const ROOT = new URL("../", import.meta.url);

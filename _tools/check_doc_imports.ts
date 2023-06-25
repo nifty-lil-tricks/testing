@@ -49,13 +49,14 @@ function checkImportStatements(
     const importPath = (moduleSpecifier as StringLiteral).text;
     const isRelative = importPath.startsWith(".");
     const isInternal = importPath.startsWith(
-      "https://deno.land/std@std_VERSION/",
+      "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/",
     );
+    const isStdLib = importPath.startsWith("https://deno.land/std/");
     const { line } = sourceFile.getLineAndCharacterOfPosition(
       moduleSpecifier.pos,
     );
 
-    if (isRelative || !isInternal) {
+    if (isRelative || !(isInternal || isStdLib)) {
       console.log(
         yellow("Warn ") +
           (isRelative

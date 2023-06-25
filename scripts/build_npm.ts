@@ -2,7 +2,10 @@
 
 import { build, type BuildOptions, emptyDir } from "x/dnt/mod.ts";
 import { dirname, fromFileUrl, join } from "std/path/mod.ts";
+import { parse } from "std/flags/mod.ts";
 import { VERSION } from "../version.ts";
+
+const { _: [pkgToBuild] } = parse(Deno.args);
 
 await emptyDir("./npm");
 
@@ -10,37 +13,63 @@ const __dirname = dirname(fromFileUrl(import.meta.url));
 const rootDir = join(__dirname, "..");
 
 const packages = [
-  "nifty-lil-tricks-testing",
+  {
+    name: "@nifty-lil-tricks/testing",
+    description:
+      "A selection of useful utilities (or nifty li'l tricks!) for all things testing",
+    dir: rootDir,
+    tags: [],
+  },
+  {
+    name: "@nifty-lil-tricks/testing-plugin-postgres",
+    description:
+      "A nifty li'l plugin for setting up postgres database instances when testing",
+    dir: join(rootDir, "plugin_postgres"),
+    tags: ["postgres"],
+  },
+  {
+    name: "@nifty-lil-tricks/testing-plugin-prisma",
+    description:
+      "A nifty li'l plugin for setting up a database with prisma when testing",
+    dir: join(rootDir, "plugin_prisma"),
+    tags: ["prisma"],
+  },
 ];
 
-function path(pkg: string, ...paths: string[]) {
-  return join(rootDir, pkg, ...paths);
+let filteredPackages = packages;
+if (pkgToBuild) {
+  filteredPackages = packages.filter((pkg) => pkg.name === pkgToBuild);
+  if (filteredPackages.length === 0) {
+    throw new Error(`Could not find package ${pkgToBuild}`);
+  }
 }
 
-async function rmBuildDir(pkg: string) {
+async function rmBuildDir(dir: string) {
   try {
-    await Deno.remove(path(pkg, "./npm"), { recursive: true });
+    await Deno.remove(dir, { recursive: true });
   } catch {
     // Do nothing
   }
 }
 
-for (const pkg of packages) {
-  Deno.chdir(path(pkg));
-  await rmBuildDir(pkg);
+for (const pkg of filteredPackages) {
+  const outDir = join(rootDir, "./npm", pkg.name);
+  Deno.chdir(pkg.dir);
+  await rmBuildDir(outDir);
   const options: BuildOptions = {
-    entryPoints: [path(pkg, "./mod.ts")],
-    outDir: path(pkg, "./npm"),
+    entryPoints: [join(pkg.dir, "./mod.ts")],
+    outDir,
     shims: {
       // see JS docs for overview and more options
       deno: true,
     },
+    rootTestDir: pkg.dir,
+    testPattern: "*.test.ts",
     package: {
       // package.json properties
-      name: pkg.replace("nifty-lil-tricks-", "@nifty-lil-tricks/"),
+      name: pkg.name,
       version: VERSION,
-      description:
-        "A selection of useful utilities (or nifty li'l tricks!) for all things testing",
+      description: pkg.description,
       author: "Jonny Green <hello@jonnydgreen.com>",
       license: "MIT",
       repository: {
@@ -55,6 +84,7 @@ for (const pkg of packages) {
         "testing",
         "deno",
         "nodejs",
+        ...pkg.tags,
       ],
       engines: {
         node: ">=18",
@@ -62,8 +92,14 @@ for (const pkg of packages) {
     },
     async postBuild() {
       // steps to run after building and before running the tests
-      await Deno.copyFile(join(rootDir, "LICENSE"), path(pkg, "npm/LICENSE"));
-      await Deno.copyFile(path(pkg, "README.md"), path(pkg, "npm/README.md"));
+      await Deno.copyFile(
+        join(rootDir, "LICENSE"),
+        join(outDir, "LICENSE"),
+      );
+      await Deno.copyFile(
+        join(pkg.dir, "README.md"),
+        join(outDir, "README.md"),
+      );
     },
   };
 
@@ -73,7 +109,7 @@ for (const pkg of packages) {
     test: true,
     importMap: join(rootDir, "test_import_map.json"),
   });
-  await rmBuildDir(pkg);
+  await rmBuildDir(outDir);
 
   // Build for publish
   await build({ ...options, test: false });
