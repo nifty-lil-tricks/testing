@@ -1,7 +1,6 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
 import type {
-  SetupTestsBaseConfig,
   SetupTestsConfig,
   SetupTestsFactoryPlugins,
   SetupTestsFactoryResult,
@@ -131,7 +130,8 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
     const teardowns: SetupTestsPluginTeardown[] = [];
     const { ...pluginsConfig } = config;
     for (const [pluginName, pluginConfig] of Object.entries(pluginsConfig)) {
-      assertAllowedPluginName(pluginName);
+      // TODO: add in when generic config is added
+      // assertAllowedPluginName(pluginName);
       const plugin = this.#plugins[pluginName];
       const result = await plugin.setup(pluginConfig);
       data = {
@@ -150,20 +150,21 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
   }
 }
 
-function assertAllowedPluginName(pluginName: string): void {
-  const bannedPluginNames: Record<keyof SetupTestsBaseConfig, string> = {};
-  if (
-    Object.keys(bannedPluginNames).includes(
-      pluginName as keyof SetupTestsBaseConfig,
-    )
-  ) {
-    throw new SetupTestsError(
-      `'${pluginName}' is a reserved plugin name, please choose another name that is not one of ${
-        Object.keys(bannedPluginNames).join("|")
-      }`,
-    );
-  }
-}
+// TODO: add in when generic config is added
+// function assertAllowedPluginName(pluginName: string): void {
+//   const bannedPluginNames: Record<keyof SetupTestsBaseConfig, string> = {};
+//   if (
+//     Object.keys(bannedPluginNames).includes(
+//       pluginName as keyof SetupTestsBaseConfig,
+//     )
+//   ) {
+//     throw new SetupTestsError(
+//       `'${pluginName}' is a reserved plugin name, please choose another name that is not one of ${
+//         Object.keys(bannedPluginNames).join("|")
+//       }`,
+//     );
+//   }
+// }
 
 /**
  * SetupTestsError
