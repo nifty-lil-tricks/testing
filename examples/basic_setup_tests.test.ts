@@ -1,10 +1,16 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import t from "tap";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  it,
+} from "https://deno.land/std@0.192.0/testing/bdd.ts";
+import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
-} from "@nifty-lil-tricks/testing";
+} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 
 // Define or import a plugin as follows:
 const helloWorldPlugin = {
@@ -22,11 +28,12 @@ export const { setupTests } = setupTestsFactory({
   helloWorld: helloWorldPlugin,
 });
 
-t.test("basic", async (t) => {
+// Then one can use this in any test file as follows:
+describe("Service", () => {
   let teardownTests: SetupTestsTeardown;
   let message: string;
 
-  t.beforeEach(async () => {
+  beforeEach(async () => {
     // Setup tests
     const result = await setupTests({
       helloWorld: { message: "Hello, world!" },
@@ -35,13 +42,15 @@ t.test("basic", async (t) => {
     teardownTests = result.teardownTests;
   });
 
-  t.afterEach(async () => {
+  afterEach(async () => {
     // Teardown tests
     await teardownTests();
   });
 
-  t.test("some test", async (t) => {
-    // Some other testing
-    t.same(message, "Hello, world!");
+  describe("method", () => {
+    it("should test something that relies on the plugin being configured", () => {
+      // Some other testing
+      assertEquals(message, "Hello, world!");
+    });
   });
 });

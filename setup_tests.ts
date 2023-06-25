@@ -76,7 +76,7 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
   }
 
   /**
-   * Setup tests using the loaded plugins.
+   * Setup tests use the loaded plugins.
    *
    * The loaded plugins available to the setupTests function returned
    * from the factory can be configured using config namespaced to the
@@ -120,7 +120,7 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
    *
    * console.log(result.data.helloWorld); // "Hello World!"
    *
-   * await result.teardown();
+   * await result.teardownTests();
    * ```
    */
   async setupTests<Config extends SetupTestsConfig<Plugins>>(
@@ -145,7 +145,7 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
 
     return {
       data: data as SetupTestsResult<Plugins, Config>["data"],
-      teardown: this.#buildTeardown(teardowns.reverse()).bind(this),
+      teardownTests: this.#buildTeardown(teardowns.reverse()).bind(this),
     };
   }
 }

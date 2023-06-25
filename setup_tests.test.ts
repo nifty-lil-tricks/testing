@@ -55,13 +55,13 @@ describe("setupTestsFactory", () => {
       // Arrange
       const plugin1Config: Plugin1Config = { data1: ["1"] };
       const plugin2Config: Plugin2Config = { data2: [2] };
-      const { teardown } = await setupTests({
+      const { teardownTests } = await setupTests({
         plugin1: plugin1Config,
         plugin2: plugin2Config,
       });
 
       // Act
-      await teardown();
+      await teardownTests();
 
       // Assert
       assertEquals(teardownCalls, ["plugin2.teardown", "plugin1.teardown"]);
@@ -70,12 +70,12 @@ describe("setupTestsFactory", () => {
     it("should run the teardown function of all plugins when all plugins are activated", async () => {
       // Arrange
       const plugin1Config: Plugin1Config = { data1: ["1"] };
-      const { teardown } = await setupTests({
+      const { teardownTests } = await setupTests({
         plugin1: plugin1Config,
       });
 
       // Act
-      await teardown();
+      await teardownTests();
 
       // Assert
       assertEquals(teardownCalls, ["plugin1.teardown"]);

@@ -2,7 +2,10 @@
 
 import { build, type BuildOptions, emptyDir } from "x/dnt/mod.ts";
 import { dirname, fromFileUrl, join } from "std/path/mod.ts";
+import { parse } from "std/flags/mod.ts";
 import { VERSION } from "../version.ts";
+
+const { _: [pkgToBuild] } = parse(Deno.args);
 
 await emptyDir("./npm");
 
@@ -17,22 +20,45 @@ const packages = [
     dir: rootDir,
     tags: [],
   },
+  {
+    name: "@nifty-lil-tricks/testing-plugin-postgres",
+    description:
+      "A nifty li'l plugin for setting up postgres database instances when testing",
+    dir: join(rootDir, "plugin_postgres"),
+    tags: ["postgres"],
+  },
+  {
+    name: "@nifty-lil-tricks/testing-plugin-prisma",
+    description:
+      "A nifty li'l plugin for setting up a database with prisma when testing",
+    dir: join(rootDir, "plugin_prisma"),
+    tags: ["prisma"],
+  },
 ];
+
+let filteredPackages = packages;
+if (pkgToBuild) {
+  filteredPackages = packages.filter((pkg) => pkg.name === pkgToBuild);
+  if (filteredPackages.length === 0) {
+    throw new Error(`Could not find package ${pkgToBuild}`);
+  }
+}
 
 async function rmBuildDir(dir: string) {
   try {
-    await Deno.remove(join(dir, "./npm"), { recursive: true });
+    await Deno.remove(dir, { recursive: true });
   } catch {
     // Do nothing
   }
 }
 
-for (const pkg of packages) {
+for (const pkg of filteredPackages) {
+  const outDir = join(rootDir, "./npm", pkg.name);
   Deno.chdir(pkg.dir);
-  await rmBuildDir(pkg.dir);
+  await rmBuildDir(outDir);
   const options: BuildOptions = {
     entryPoints: [join(pkg.dir, "./mod.ts")],
-    outDir: join(pkg.dir, "./npm"),
+    outDir,
     shims: {
       // see JS docs for overview and more options
       deno: true,
@@ -68,11 +94,11 @@ for (const pkg of packages) {
       // steps to run after building and before running the tests
       await Deno.copyFile(
         join(rootDir, "LICENSE"),
-        join(pkg.dir, "npm/LICENSE"),
+        join(outDir, "LICENSE"),
       );
       await Deno.copyFile(
         join(pkg.dir, "README.md"),
-        join(pkg.dir, "npm/README.md"),
+        join(outDir, "README.md"),
       );
     },
   };
@@ -83,7 +109,7 @@ for (const pkg of packages) {
     test: true,
     importMap: join(rootDir, "test_import_map.json"),
   });
-  await rmBuildDir(pkg.dir);
+  await rmBuildDir(outDir);
 
   // Build for publish
   await build({ ...options, test: false });

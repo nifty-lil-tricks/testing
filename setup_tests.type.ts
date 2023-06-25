@@ -38,7 +38,7 @@ export type SetupTestsResult<
       ReturnType<Plugins[Key]["setup"]>
     >;
   };
-  teardown: SetupTestsTeardown;
+  teardownTests: SetupTestsTeardown;
 };
 
 export type SetupTestsPluginTeardown = () => void | Promise<void>;
