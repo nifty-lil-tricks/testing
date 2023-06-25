@@ -1,1 +1,1 @@
-# nifty-lil-tricks-testing
+# @nifty-lil-tricks/testing

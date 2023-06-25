@@ -7,7 +7,7 @@ t.test("basic", async (t) => {
   let setup: unknown;
 
   t.beforeEach(async () => {
-    setup = await setupTests({ loaders: [] });
+    setup = await setupTests({ plugins: [] });
   });
 
   t.test("some test", async (t) => {

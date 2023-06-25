@@ -10,37 +10,40 @@ const __dirname = dirname(fromFileUrl(import.meta.url));
 const rootDir = join(__dirname, "..");
 
 const packages = [
-  "nifty-lil-tricks-testing",
+  {
+    name: "@nifty-lil-tricks/testing",
+    description:
+      "A selection of useful utilities (or nifty li'l tricks!) for all things testing",
+    dir: rootDir,
+    tags: [],
+  },
 ];
 
-function path(pkg: string, ...paths: string[]) {
-  return join(rootDir, pkg, ...paths);
-}
-
-async function rmBuildDir(pkg: string) {
+async function rmBuildDir(dir: string) {
   try {
-    await Deno.remove(path(pkg, "./npm"), { recursive: true });
+    await Deno.remove(join(dir, "./npm"), { recursive: true });
   } catch {
     // Do nothing
   }
 }
 
 for (const pkg of packages) {
-  Deno.chdir(path(pkg));
-  await rmBuildDir(pkg);
+  Deno.chdir(pkg.dir);
+  await rmBuildDir(pkg.dir);
   const options: BuildOptions = {
-    entryPoints: [path(pkg, "./mod.ts")],
-    outDir: path(pkg, "./npm"),
+    entryPoints: [join(pkg.dir, "./mod.ts")],
+    outDir: join(pkg.dir, "./npm"),
     shims: {
       // see JS docs for overview and more options
       deno: true,
     },
+    rootTestDir: pkg.dir,
+    testPattern: "*.test.ts",
     package: {
       // package.json properties
-      name: pkg.replace("nifty-lil-tricks-", "@nifty-lil-tricks/"),
+      name: pkg.name,
       version: VERSION,
-      description:
-        "A selection of useful utilities (or nifty li'l tricks!) for all things testing",
+      description: pkg.description,
       author: "Jonny Green <hello@jonnydgreen.com>",
       license: "MIT",
       repository: {
@@ -55,6 +58,7 @@ for (const pkg of packages) {
         "testing",
         "deno",
         "nodejs",
+        ...pkg.tags,
       ],
       engines: {
         node: ">=18",
@@ -62,8 +66,14 @@ for (const pkg of packages) {
     },
     async postBuild() {
       // steps to run after building and before running the tests
-      await Deno.copyFile(join(rootDir, "LICENSE"), path(pkg, "npm/LICENSE"));
-      await Deno.copyFile(path(pkg, "README.md"), path(pkg, "npm/README.md"));
+      await Deno.copyFile(
+        join(rootDir, "LICENSE"),
+        join(pkg.dir, "npm/LICENSE"),
+      );
+      await Deno.copyFile(
+        join(pkg.dir, "README.md"),
+        join(pkg.dir, "npm/README.md"),
+      );
     },
   };
 
@@ -73,7 +83,7 @@ for (const pkg of packages) {
     test: true,
     importMap: join(rootDir, "test_import_map.json"),
   });
-  await rmBuildDir(pkg);
+  await rmBuildDir(pkg.dir);
 
   // Build for publish
   await build({ ...options, test: false });
