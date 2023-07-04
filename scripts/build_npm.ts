@@ -21,11 +21,11 @@ const packages = [
     tags: [],
   },
   {
-    name: "@nifty-lil-tricks/testing-plugin-postgres",
+    name: "@nifty-lil-tricks/testing-plugin-postgresql",
     description:
-      "A nifty li'l plugin for setting up postgres database instances when testing",
-    dir: join(rootDir, "plugin_postgres"),
-    tags: ["postgres"],
+      "A nifty li'l plugin for setting up postgresql database instances when testing",
+    dir: join(rootDir, "plugin_postgresql"),
+    tags: ["postgresql"],
   },
   {
     name: "@nifty-lil-tricks/testing-plugin-prisma",
@@ -60,7 +60,6 @@ for (const pkg of filteredPackages) {
     entryPoints: [join(pkg.dir, "./mod.ts")],
     outDir,
     shims: {
-      // see JS docs for overview and more options
       deno: true,
     },
     rootTestDir: pkg.dir,

@@ -1,17 +1,18 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
+export interface SetupTestsPluginInstance<Result> {
+  output: Result;
+  teardown: () => MaybePromise<void>;
+}
+
+export type MaybePromise<Type> = Type | Promise<Type>;
+
 export type SetupTestsPluginSetupFn<Config, Result> = (
   config: Config,
-) => Result | Promise<Result>;
-
-export type SetupTestsPluginTeardownFn<Config, Result> = (
-  config: Config,
-  result: Result,
-) => void | Promise<void>;
+) => MaybePromise<SetupTestsPluginInstance<Result>>;
 
 export type SetupTestsPlugin<Config, Result> = {
   setup: SetupTestsPluginSetupFn<Config, Result>;
-  teardown: SetupTestsPluginTeardownFn<Config, Result>;
 };
 
 // This is an acceptable use of any because it's only used in the type signature
@@ -33,7 +34,7 @@ export type SetupTestsResult<
   Plugins extends SetupTestsPlugins,
   Config extends SetupTestsConfig<Plugins>,
 > = {
-  data: {
+  outputs: {
     [Key in Extract<keyof Plugins, DefinedKeys<Config>>]: Awaited<
       ReturnType<Plugins[Key]["setup"]>
     >;
@@ -41,7 +42,7 @@ export type SetupTestsResult<
   teardownTests: SetupTestsTeardown;
 };
 
-export type SetupTestsPluginTeardown = () => void | Promise<void>;
+export type SetupTestsPluginTeardown = () => MaybePromise<void>;
 
 export type SetupTestsTeardown = () => Promise<void>;
 

@@ -28,9 +28,10 @@ import type {
  * const helloWorldPlugin = {
  *   setup: (config: { message: string }) => {
  *     // Setup plugin according to config
- *   },
- *   teardown: () => {
- *    // Teardown any setup resources
+ *     return {
+ *       output: config,
+ *       teardown: () => {}
+ *     }
  *   },
  * }
  *
@@ -54,17 +55,6 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
 
   constructor(plugins: SetupTestsFactoryPlugins<Plugins>) {
     this.#plugins = plugins;
-  }
-
-  #buildPluginTeardown<Config, Result>(
-    pluginName: string,
-    config: Config,
-    result: Result,
-  ): SetupTestsPluginTeardown {
-    const plugin = this.#plugins[pluginName];
-    return () => {
-      return plugin.teardown(config, result);
-    };
   }
 
   #buildTeardown(teardowns: SetupTestsPluginTeardown[]): SetupTestsTeardown {
@@ -102,13 +92,14 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
    * const helloWorldPlugin = {
    *   setup: (config: { message: string }) => {
    *     // Setup plugin according to config
-   *   },
-   *   teardown: () => {
-   *    // Teardown any setup resources
+   *     return {
+   *       output: config,
+   *       teardown: () => {}
+   *     }
    *   },
    * }
    *
-   * const { setupTests } = setupTestsFactory({
+   * export const { setupTests } = setupTestsFactory({
    *   helloWorld: helloWorldPlugin,
    * });
    *
@@ -118,7 +109,7 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
    *   }
    * })
    *
-   * console.log(result.data.helloWorld); // "Hello World!"
+   * console.log(result.outputs.helloWorld.output); // "Hello World!"
    *
    * await result.teardownTests();
    * ```
@@ -126,25 +117,29 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
   async setupTests<Config extends SetupTestsConfig<Plugins>>(
     config: Config,
   ): Promise<SetupTestsResult<Plugins, Config>> {
-    let data = {};
+    let outputs = {} as SetupTestsResult<Plugins, Config>["outputs"];
     const teardowns: SetupTestsPluginTeardown[] = [];
     const { ...pluginsConfig } = config;
     for (const [pluginName, pluginConfig] of Object.entries(pluginsConfig)) {
       // TODO: add in when generic config is added
       // assertAllowedPluginName(pluginName);
       const plugin = this.#plugins[pluginName];
-      const result = await plugin.setup(pluginConfig);
-      data = {
-        ...data,
-        [pluginName]: result,
+      const { teardown, output } = await plugin.setup(pluginConfig);
+      const pluginOutput = {
+        output,
+        teardown,
+      } as Awaited<ReturnType<Plugins[keyof Plugins]["setup"]>>;
+      outputs = {
+        ...outputs,
+        [pluginName]: pluginOutput,
       };
       teardowns.push(
-        this.#buildPluginTeardown(pluginName, pluginConfig, result),
+        teardown,
       );
     }
 
     return {
-      data: data as SetupTestsResult<Plugins, Config>["data"],
+      outputs,
       teardownTests: this.#buildTeardown(teardowns.reverse()).bind(this),
     };
   }

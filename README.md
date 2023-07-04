@@ -56,10 +56,10 @@ import {
 const helloWorldPlugin = {
   setup: (config: { message: string }) => {
     // Setup plugin according to config
-    return config.message;
-  },
-  teardown: () => {
-    // Teardown any setup resources
+    return {
+      output: config,
+      teardown: () => {},
+    };
   },
 };
 
@@ -78,7 +78,7 @@ describe("Service", () => {
     const result = await setupTests({
       helloWorld: { message: "Hello, world!" },
     });
-    message = result.data.helloWorld;
+    message = result.outputs.helloWorld.output.message;
     teardownTests = result.teardownTests;
   });
 
@@ -130,10 +130,12 @@ type HelloWorldResult = string;
 const helloWorldPlugin: SetupTestsPlugin<HelloWorldConfig, HelloWorldResult> = {
   setup(config: HelloWorldConfig) {
     // Setup plugin according to config
-    return config.message;
-  },
-  teardown(config: HelloWorldConfig, result: HelloWorldResult) {
-    // Teardown any setup resources
+    return {
+      output: config.message,
+      teardown() {
+        // Teardown any setup resources
+      },
+    };
   },
 };
 ```
@@ -161,10 +163,12 @@ import {
 const helloWorldPlugin = {
   setup: (config: { message: string }) => {
     // Setup plugin according to config
-    return config.message;
-  },
-  teardown: () => {
-    // Teardown any setup resources
+    return {
+      output: config.message,
+      teardown: () => {
+        // Teardown any setup resources
+      },
+    };
   },
 };
 
@@ -177,7 +181,7 @@ const result = await setupTests({
   helloWorld: { message: "Hello, world!" },
 });
 
-result.data.helloWorld; // "Hello, world!"
+result.outputs.helloWorld.output; // "Hello, world!"
 ```
 
 Only plugins that are configured will be run. If a plugin is not configured,
@@ -206,10 +210,12 @@ import {
 const helloWorldPlugin = {
   setup: (config: { message: string }) => {
     // Setup plugin according to config
-    return config.message;
-  },
-  teardown: () => {
-    // Teardown any setup resources
+    return {
+      output: config.message,
+      teardown: () => {
+        // Teardown any setup resources
+      },
+    };
   },
 };
 
