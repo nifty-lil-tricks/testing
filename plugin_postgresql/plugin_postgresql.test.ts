@@ -109,6 +109,7 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
           strategy: "docker",
         },
       });
+      teardownTests = result.teardownTests;
 
       // Act
       await result.teardownTests();
@@ -142,6 +143,7 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
             strategy: "docker",
           },
         });
+        teardownTests = result.teardownTests;
 
         // Act
         Deno.env.delete("PATH");

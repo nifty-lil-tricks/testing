@@ -26,6 +26,7 @@ const packages = [
       "A nifty li'l plugin for setting up postgresql database instances when testing",
     dir: join(rootDir, "plugin_postgresql"),
     tags: ["postgresql"],
+    test: false,
   },
   {
     name: "@nifty-lil-tricks/testing-plugin-prisma",
@@ -103,12 +104,14 @@ for (const pkg of filteredPackages) {
   };
 
   // Build and test
-  await build({
-    ...options,
-    test: true,
-    importMap: join(rootDir, "test_import_map.json"),
-  });
-  await rmBuildDir(outDir);
+  if (pkg.test !== false) {
+    await build({
+      ...options,
+      test: true,
+      importMap: join(rootDir, "test_import_map.json"),
+    });
+    await rmBuildDir(outDir);
+  }
 
   // Build for publish
   await build({ ...options, test: false });
