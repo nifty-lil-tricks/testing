@@ -73,10 +73,12 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
     });
 
     it("should error if docker is not running or available", async () => {
-      const originalPathValue = Deno.env.get("PATH") as string;
+      const originalOutputFn = DenoCommand.prototype.output;
+      DenoCommand.prototype.output = () => {
+        throw new Error("kaboom");
+      };
       try {
         // Arrange, Act & Assert
-        Deno.env.delete("PATH");
         await assertRejects(() =>
           setupTests({
             databaseServer: {
@@ -85,7 +87,7 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
           })
         );
       } finally {
-        Deno.env.set("PATH", originalPathValue);
+        DenoCommand.prototype.output = originalOutputFn;
       }
     });
 
@@ -131,7 +133,7 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
 
     it("should only log a warning when the teardown tests function errors", async () => {
       // Arrange
-      const originalPathValue = Deno.env.get("PATH") as string;
+      const originalOutputFn = DenoCommand.prototype.output;
       const originalWarn = console.warn;
       const warnings: string[] = [];
       console.warn = (message: string) => warnings.push(message);
@@ -144,9 +146,11 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
           },
         });
         teardownTests = result.teardownTests;
+        DenoCommand.prototype.output = () => {
+          throw new Error("kaboom");
+        };
 
         // Act
-        Deno.env.delete("PATH");
         await result.teardownTests();
 
         // Assert
@@ -156,7 +160,7 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
           "Error tearing down postgresql database server",
         );
       } finally {
-        Deno.env.set("PATH", originalPathValue);
+        DenoCommand.prototype.output = originalOutputFn;
         console.warn = originalWarn;
       }
     });
