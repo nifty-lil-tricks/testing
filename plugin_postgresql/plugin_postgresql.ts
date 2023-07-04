@@ -87,6 +87,6 @@ export const postgresqlDatabaseServerPlugin: PostgresqlDatabaseServerPlugin = {
   },
 };
 
-function assertNever(input: never, message?: string): never {
-  throw new Error(message ?? "Unexpected input: " + input);
+function assertNever(_input: never, message: string): never {
+  throw new Error(message);
 }

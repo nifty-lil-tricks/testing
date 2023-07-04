@@ -75,7 +75,7 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
     it("should error if docker is not running or available", async () => {
       const originalPathValue = Deno.env.get("PATH") as string;
       try {
-        // Arrange & Act
+        // Arrange, Act & Assert
         Deno.env.delete("PATH");
         await assertRejects(() =>
           setupTests({
@@ -87,6 +87,17 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
       } finally {
         Deno.env.set("PATH", originalPathValue);
       }
+    });
+
+    it("should error if an unknown strategy is provided", async () => {
+      // Arrange, Act & Assert
+      await assertRejects(() =>
+        setupTests({
+          databaseServer: {
+            strategy: "unknown" as unknown as "docker",
+          },
+        })
+      );
     });
   });
 
@@ -115,6 +126,37 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
       ).output();
       assertEquals(rawDetails.code, 1);
       assertEquals(rawDetails.success, false);
+    });
+
+    it("should only log a warning when the teardown tests function errors", async () => {
+      // Arrange
+      const originalPathValue = Deno.env.get("PATH") as string;
+      const originalWarn = console.warn;
+      const warnings: string[] = [];
+      console.warn = (message: string) => warnings.push(message);
+      try {
+        // Arrange
+        // TODO: add a spy to check that the warning is logged
+        const result = await setupTests({
+          databaseServer: {
+            strategy: "docker",
+          },
+        });
+
+        // Act
+        Deno.env.delete("PATH");
+        await result.teardownTests();
+
+        // Assert
+        assertEquals(warnings.length, 1);
+        assertEquals(
+          warnings[0],
+          "Error tearing down postgresql database server",
+        );
+      } finally {
+        Deno.env.set("PATH", originalPathValue);
+        console.warn = originalWarn;
+      }
     });
   });
 });
