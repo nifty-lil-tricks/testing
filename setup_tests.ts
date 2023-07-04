@@ -161,9 +161,9 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
 //   }
 // }
 
-/**
- * SetupTestsError
- */
-export class SetupTestsError extends Error {
-  override name = "SetupTestsError";
-}
+// /**
+//  * SetupTestsError
+//  */
+// export class SetupTestsError extends Error {
+//   override name = "SetupTestsError";
+// }
