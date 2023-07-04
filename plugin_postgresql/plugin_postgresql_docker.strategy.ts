@@ -40,8 +40,10 @@ export class PostgresqlDatabaseDockerServer
     // TODO: pass through config
     const dbServerStartCommandArgs = [
       "run",
-      "-d",
-      "-p",
+      "--name",
+      "my-database",
+      "--detach",
+      "--publish",
       "5432:5432",
       "-e",
       "POSTGRES_PASSWORD=postgres",
@@ -63,8 +65,7 @@ export class PostgresqlDatabaseDockerServer
       "docker",
       { args: ["inspect", containerId] },
     ).output();
-    const details = JSON.parse(new TextDecoder().decode(rawDetails.stdout));
-    console.log("details", details);
+    JSON.parse(new TextDecoder().decode(rawDetails.stdout));
     await this.#isDbHealthy(containerId);
     return {
       teardown: this.#teardown.bind(this, containerId),
