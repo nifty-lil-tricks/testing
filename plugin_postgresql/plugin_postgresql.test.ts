@@ -1,6 +1,10 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
+import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+import {
+  assertEquals,
+  assertRejects,
+} from "https://deno.land/std@0.192.0/testing/asserts.ts";
 import {
   afterEach,
   beforeEach,
@@ -40,7 +44,7 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
 
   describe("setupTests", () => {
     it("should setup tests with a postgresql database server", async () => {
-      // Act
+      // Arrange & Act
       const result = await setupTests({
         databaseServer: {
           strategy: "docker",
@@ -54,15 +58,63 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
         {
           args: [
             "inspect",
+            result.outputs.databaseServer.output.containerId,
+          ],
+        },
+      ).output();
+      const details = JSON.parse(
+        new TextDecoder().decode(rawDetails.stdout).trim(),
+      );
+      const { containerId, connection } = result.outputs.databaseServer.output;
+      assertEquals(details?.[0]?.Id, containerId);
+      const client = new Client({ ...connection, tls: { enabled: false } });
+      await client.connect();
+      await client.end();
+    });
+
+    it("should error if docker is not running or available", async () => {
+      const originalPathValue = Deno.env.get("PATH") as string;
+      try {
+        // Arrange & Act
+        Deno.env.delete("PATH");
+        await assertRejects(() =>
+          setupTests({
+            databaseServer: {
+              strategy: "docker",
+            },
+          })
+        );
+      } finally {
+        Deno.env.set("PATH", originalPathValue);
+      }
+    });
+  });
+
+  describe("teardownTests", () => {
+    it("should teardown tests with a postgresql database server", async () => {
+      // Arrange
+      const result = await setupTests({
+        databaseServer: {
+          strategy: "docker",
+        },
+      });
+
+      // Act
+      await result.teardownTests();
+
+      // Assert
+      const rawDetails = await new DenoCommand(
+        "docker",
+        {
+          args: [
+            "inspect",
             '--format="{{.ID}}"',
             result.outputs.databaseServer.output.containerId,
           ],
         },
       ).output();
-      const id: string = JSON.parse(
-        new TextDecoder().decode(rawDetails.stdout).trim(),
-      );
-      assertEquals(id, result.outputs.databaseServer.output.containerId);
+      assertEquals(rawDetails.code, 1);
+      assertEquals(rawDetails.success, false);
     });
   });
 });

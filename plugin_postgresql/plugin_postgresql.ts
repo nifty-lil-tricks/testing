@@ -4,15 +4,30 @@ import type {
   SetupTestsPlugin,
   SetupTestsPluginInstance,
 } from "../setup_tests.type.ts";
-import { PostgresqlDatabaseDockerServer } from "./plugin_postgresql_docker.strategy.ts";
+import {
+  PostgresqlDatabaseDockerServer,
+  PostgresqlDatabaseDockerServerConfig,
+} from "./plugin_postgresql_docker.strategy.ts";
 
 export type PostgresqlDatabaseServerPluginStrategy = "docker";
 
 export interface PostgresqlDatabaseServerPluginConfig {
   strategy: PostgresqlDatabaseServerPluginStrategy;
+  databaseServerNamePrefix?: string;
+  databaseNamePrefix?: string;
+  databaseName?: string;
+  port?: number;
+  password?: string;
+  user?: string;
+  version?: string;
 }
 
 export interface PostgresqlDatabaseServerPluginConnection {
+  serverName: string;
+  hostname: string;
+  port: number;
+  user: string;
+  password: string;
   database: string;
 }
 
@@ -36,10 +51,30 @@ export const postgresqlDatabaseServerPlugin: PostgresqlDatabaseServerPlugin = {
   setup(
     config: PostgresqlDatabaseServerPluginConfig,
   ): Promise<SetupTestsPluginInstance<PostgresqlDatabaseServerPluginResult>> {
+    const suffix = Math.random().toString(36).substring(2);
+    const database = config.databaseName ||
+      `${config.databaseNamePrefix || "postgres"}-${suffix}`;
+    const serverName = `${
+      config.databaseServerNamePrefix || "postgres"
+    }-${suffix}`;
+    const port = config.port ?? 0;
+    const user = config.user ?? Math.random().toString(36).substring(2);
+    const password = config.password ??
+      Math.random().toString(36).substring(2);
+    const version = config.version || "latest";
+
     switch (config.strategy) {
       case "docker": {
+        const dockerConfig: PostgresqlDatabaseDockerServerConfig = {
+          serverName,
+          port,
+          user,
+          password,
+          database,
+          version,
+        };
         const postgresqlDatabaseDockerServer =
-          new PostgresqlDatabaseDockerServer(config);
+          new PostgresqlDatabaseDockerServer(dockerConfig);
         return postgresqlDatabaseDockerServer.setup();
       }
       default: {

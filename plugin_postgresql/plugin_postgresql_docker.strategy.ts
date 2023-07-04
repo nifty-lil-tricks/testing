@@ -7,17 +7,16 @@ import type {
 import { DenoCommand } from "../setup_tests.utils.ts";
 import type {
   PostgresqlDatabaseServer,
-  PostgresqlDatabaseServerPluginConfig,
+  PostgresqlDatabaseServerPluginConnection,
 } from "./plugin_postgresql.ts";
 
-export type PostgresqlDatabaseDockerServerConfig = Omit<
-  PostgresqlDatabaseServerPluginConfig,
-  "strategy"
->;
-
-export interface PostgresqlDatabaseDockerServerPluginConnection {
-  database: string;
+export interface PostgresqlDatabaseDockerServerConfig
+  extends Omit<PostgresqlDatabaseDockerServerPluginConnection, "hostname"> {
+  version: string;
 }
+
+export type PostgresqlDatabaseDockerServerPluginConnection =
+  PostgresqlDatabaseServerPluginConnection;
 
 export interface PostgresqlDatabaseDockerServerResult {
   containerId: string;
@@ -31,27 +30,29 @@ export type PostgresqlDatabaseDockerServerPlugin = SetupTestsPlugin<
 
 export class PostgresqlDatabaseDockerServer
   implements PostgresqlDatabaseServer {
-  constructor(_config: PostgresqlDatabaseDockerServerConfig) {}
+  #config: PostgresqlDatabaseDockerServerConfig;
+  constructor(config: PostgresqlDatabaseDockerServerConfig) {
+    this.#config = config;
+  }
 
   async setup(): Promise<
     SetupTestsPluginInstance<PostgresqlDatabaseDockerServerResult>
   > {
-    const databaseName = "something";
     // TODO: pass through config
     const dbServerStartCommandArgs = [
       "run",
       "--name",
-      "my-database",
+      this.#config.serverName,
       "--detach",
-      "--publish",
-      "5432:5432",
+      "-p",
+      `${this.#config.port ? this.#config.port + ":" : ""}5432`,
       "-e",
-      "POSTGRES_PASSWORD=postgres",
+      `POSTGRES_PASSWORD=${this.#config.password}`,
       "-e",
-      "POSTGRES_USER=postgres",
+      `POSTGRES_USER=${this.#config.user}`,
       "-e",
-      "POSTGRES_DB=postgres",
-      "postgres",
+      `POSTGRES_DB=${this.#config.database}`,
+      `postgres:${this.#config.version}`,
     ];
     const runDbServerStart = new DenoCommand(
       "docker",
@@ -65,14 +66,26 @@ export class PostgresqlDatabaseDockerServer
       "docker",
       { args: ["inspect", containerId] },
     ).output();
-    JSON.parse(new TextDecoder().decode(rawDetails.stdout));
+    const details = JSON.parse(new TextDecoder().decode(rawDetails.stdout));
+    const networkSettings = details?.[0]?.NetworkSettings?.Ports?.["5432/tcp"];
+    const port = Number(networkSettings?.[0]?.HostPort);
+    // const hostname = networkSettings?.[0]?.HostIp;
+    const hostname = "localhost";
+    if (Number.isNaN(port) || !hostname) {
+      throw new Error("kaboom");
+    }
     await this.#isDbHealthy(containerId);
     return {
       teardown: this.#teardown.bind(this, containerId),
       output: {
         containerId,
         connection: {
-          database: databaseName,
+          serverName: this.#config.serverName,
+          hostname,
+          port,
+          user: this.#config.user,
+          password: this.#config.password,
+          database: this.#config.database,
         },
       },
     };
@@ -102,9 +115,8 @@ export class PostgresqlDatabaseDockerServer
       const output = await c.output();
       if (output.success && output.code === 0) {
         shouldReturn = true;
-        return;
       }
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      await new Promise((resolve) => setTimeout(resolve, 300));
     }
   }
 }
