@@ -14,14 +14,17 @@ import {
 import {
   postgresqlDatabaseServerPlugin,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+import { DenoCommand } from "../setup_tests.utils.ts";
 
 // In another file, load plugins as follows to generate a setupTests function:
 export const { setupTests } = setupTestsFactory({
   databaseServer: postgresqlDatabaseServerPlugin,
 });
 
+const ignore = Deno.env.get("IGNORE_DOCKER_TESTS") === "true";
+
 // Then one can use this in any test file as follows:
-describe("postgresqlDatabaseServerPlugin", () => {
+describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
   let teardownTests: SetupTestsTeardown;
 
   beforeEach(() => {
@@ -46,7 +49,7 @@ describe("postgresqlDatabaseServerPlugin", () => {
       teardownTests = result.teardownTests;
 
       // Assert
-      const rawDetails = await new Deno.Command(
+      const rawDetails = await new DenoCommand(
         "docker",
         {
           args: [

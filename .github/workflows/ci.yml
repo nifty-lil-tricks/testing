@@ -28,14 +28,10 @@ jobs:
         with:
           deno-version: ${{ matrix.deno }}
 
-      - name: TODO remove
-        run: |
-          which docker
-          echo $PATH
-          docker info
-
       - name: Run tests
         run: deno task test
+        env:
+          IGNORE_DOCKER_TESTS: ${{ matrix.os == 'ubuntu-latest' && 'false' || 'true' }}
 
       # TODO: add later
       # - name: Type check browser compatible modules
