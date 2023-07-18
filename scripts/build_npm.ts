@@ -3,7 +3,9 @@
 import { build, type BuildOptions, emptyDir } from "x/dnt/mod.ts";
 import { dirname, fromFileUrl, join } from "std/path/mod.ts";
 import { parse } from "std/flags/mod.ts";
+import { parse as parseSemver } from "std/semver/mod.ts";
 import { VERSION } from "../version.ts";
+import type { SpecifierMappings } from "x/dnt/transform.ts";
 
 const { _: [pkgToBuild] } = parse(Deno.args);
 
@@ -12,7 +14,16 @@ await emptyDir("./npm");
 const __dirname = dirname(fromFileUrl(import.meta.url));
 const rootDir = join(__dirname, "..");
 
-const packages = [
+interface Package {
+  name: string;
+  description: string;
+  dir: string;
+  tags: string[];
+  test?: boolean;
+  mappings?: SpecifierMappings;
+}
+
+const packages: Package[] = [
   {
     name: "@nifty-lil-tricks/testing",
     description:
@@ -27,6 +38,12 @@ const packages = [
     dir: join(rootDir, "plugin_postgresql"),
     tags: ["postgresql"],
     test: false,
+    mappings: {
+      "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts": {
+        name: "@nifty-lil-tricks/testing",
+        version: `^${parseSemver(VERSION).major}.0.0`,
+      },
+    } as SpecifierMappings,
   },
   {
     name: "@nifty-lil-tricks/testing-plugin-prisma",
@@ -57,6 +74,14 @@ for (const pkg of filteredPackages) {
   const outDir = join(rootDir, "./npm", pkg.name);
   Deno.chdir(pkg.dir);
   await rmBuildDir(outDir);
+  const mappings: SpecifierMappings = {};
+  const deps: Record<string, string> = {};
+  for (const [name, mapping] of Object.entries(pkg.mappings ?? {})) {
+    mappings[name] = typeof mapping === "string" ? mapping : mapping.name;
+    if (typeof mapping !== "string" && mapping.version) {
+      deps[mapping.name] = mapping.version;
+    }
+  }
   const options: BuildOptions = {
     entryPoints: [join(pkg.dir, "./mod.ts")],
     outDir,
@@ -65,6 +90,8 @@ for (const pkg of filteredPackages) {
     },
     rootTestDir: pkg.dir,
     testPattern: "*.test.ts",
+    packageManager: "npm",
+    mappings,
     package: {
       // package.json properties
       name: pkg.name,
@@ -108,11 +135,34 @@ for (const pkg of filteredPackages) {
     await build({
       ...options,
       test: true,
+      mappings: undefined,
       importMap: join(rootDir, "test_import_map.json"),
     });
     await rmBuildDir(outDir);
   }
 
   // Build for publish
-  await build({ ...options, test: false });
+  await build({
+    ...options,
+    typeCheck: false,
+    test: false,
+  });
+  await adjustPackageJson(pkg, outDir);
+}
+
+async function adjustPackageJson(pkg: Package, outDir: string): Promise<void> {
+  const path = join(outDir, "package.json");
+  const rawPackageJson = await Deno.readTextFile(path);
+  const packageJson = JSON.parse(rawPackageJson);
+  const deps: Record<string, string> = {};
+  for (const mapping of Object.values(pkg.mappings ?? {})) {
+    if (typeof mapping !== "string" && mapping.version) {
+      deps[mapping.name] = mapping.version;
+    }
+  }
+  packageJson.dependencies = {
+    ...packageJson.dependencies,
+    ...deps,
+  };
+  await Deno.writeTextFile(path, JSON.stringify(packageJson, null, 2));
 }

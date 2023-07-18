@@ -38,7 +38,7 @@
     "lint:deprecations": "deno run --allow-read --allow-net ./_tools/check_deprecations.ts",
     "lint:doc-imports": "deno run --allow-env --allow-read ./_tools/check_doc_imports.ts",
     "lint:check-assertions": "deno run --allow-read --allow-net ./_tools/check_assertions.ts",
-    "lint": "deno lint && deno fmt --check && deno task fmt:licence-headers --check && deno task lint:deprecations && deno task lint:doc-imports && deno task lint:check-assertions",
+    "lint": "deno lint && deno fmt --check && deno task fmt:licence-headers --check && deno task lint:doc-imports && deno task lint:check-assertions",
     "pre-commit": "deno task lint && deno task test",
     "build": "deno run -A scripts/build_npm.ts",
     "cov": "deno task test && deno coverage ./cov --lcov --output=cov.lcov",

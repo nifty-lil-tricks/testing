@@ -3,12 +3,13 @@
 import type {
   SetupTestsPlugin,
   SetupTestsPluginInstance,
-} from "../setup_tests.type.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import {
   PostgresqlDatabaseDockerServer,
   PostgresqlDatabaseDockerServerConfig,
 } from "./plugin_postgresql_docker.strategy.ts";
 
+// TODO: type file
 export type PostgresqlDatabaseServerPluginStrategy = "docker";
 
 export interface PostgresqlDatabaseServerPluginConfig {

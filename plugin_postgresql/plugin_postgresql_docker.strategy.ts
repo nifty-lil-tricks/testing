@@ -1,14 +1,14 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import type {
-  SetupTestsPlugin,
-  SetupTestsPluginInstance,
-} from "../setup_tests.type.ts";
-import { DenoCommand } from "../setup_tests.utils.ts";
+import {
+  type SetupTestsPlugin,
+  type SetupTestsPluginInstance,
+} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import type {
   PostgresqlDatabaseServer,
   PostgresqlDatabaseServerPluginConnection,
 } from "./plugin_postgresql.ts";
+import { DenoCommand } from "./plugin_postgresql.utils.ts";
 
 export interface PostgresqlDatabaseDockerServerConfig
   extends Omit<PostgresqlDatabaseDockerServerPluginConnection, "hostname"> {

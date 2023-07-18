@@ -68,7 +68,6 @@ describe("Service", () => {
   describe("method", () => {
     it("should test something that relies on the plugin being configured", () => {
       // Some other testing
-      console.log("connection", connection);
       assertExists(connection);
     });
   });
