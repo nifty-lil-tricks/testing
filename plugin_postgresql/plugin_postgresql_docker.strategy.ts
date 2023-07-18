@@ -28,6 +28,9 @@ export type PostgresqlDatabaseDockerServerPlugin = SetupTestsPlugin<
   PostgresqlDatabaseDockerServerResult
 >;
 
+/**
+ * Hi
+ */
 export class PostgresqlDatabaseDockerServer
   implements PostgresqlDatabaseServer {
   #config: PostgresqlDatabaseDockerServerConfig;
@@ -38,7 +41,6 @@ export class PostgresqlDatabaseDockerServer
   async setup(): Promise<
     SetupTestsPluginInstance<PostgresqlDatabaseDockerServerResult>
   > {
-    // TODO: pass through config
     const dbServerStartCommandArgs = [
       "run",
       "--name",
@@ -60,7 +62,6 @@ export class PostgresqlDatabaseDockerServer
     );
     const raw = await runDbServerStart.output();
     // TODO: check for errors
-    // TODO: wait for db to be ready
     const containerId = new TextDecoder().decode(raw.stdout).trim();
     const rawDetails = await new DenoCommand(
       "docker",

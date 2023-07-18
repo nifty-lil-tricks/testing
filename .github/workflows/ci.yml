@@ -89,9 +89,8 @@ jobs:
       - name: Check License headers
         run: deno task fmt:licence-headers --check
 
-      # TODO: add later
-      # - name: Check Deprecations
-      #   run: "deno task lint:deprecations"
+      - name: Check Deprecations
+        run: "deno task lint:deprecations"
 
       - name: Check Import paths in Docs
         run: "deno task lint:doc-imports"

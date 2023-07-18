@@ -1,6 +1,6 @@
 .DS_Store
 .idea
-.vscode/settings.json
+.vscode/
 .vim
 **/cov/
 deno.lock
