@@ -1,5 +1,7 @@
 # nifty_lil_tricks_testing
 
+**Note: this package and selected plugins are currently a work in progress**
+
 [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing)
 [![GitHub License](https://img.shields.io/github/license/jonnydgreen/nifty-lil-tricks-testing?style=flat-square)](https://raw.githubusercontent.com/jonnydgreen/nifty-lil-tricks-testing/main/LICENSE)
 [![Buy us a tree](https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen)](https://plant.treeware.earth/jonnydgreen/nifty-lil-tricks-testing)
