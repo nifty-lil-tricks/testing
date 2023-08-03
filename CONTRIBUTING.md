@@ -1,5 +1,15 @@
 # Contributing
 
+## Setup git hooks
+
+It is recommended to setup git hooks to ensure code quality and consistency.
+
+To setup git hooks, run the following:
+
+```sh
+git config core.hooksPath .githooks
+```
+
 ## Install Deno
 
 ### Via asdf
