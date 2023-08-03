@@ -31,6 +31,7 @@ The following features are supported
   test suite for testing with loaded plugins through a simple to use interface.
 - Teardown functionality for restoring the state of the environment after tests
   have run.
+- Ready-made plugins to get started with straight-away.
 
 ### Setup tests
 
@@ -231,6 +232,16 @@ const result = await setupTests({
 // Teardown tests to restore environment after tests have run
 await result.teardownTests();
 ```
+
+### Plugins
+
+The following plugins are available:
+
+| Plugin                                    | Description                                                                                            | Status             | Docs                                                                                                  |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------ | ----------------------------------------------------------------------------------------------------- |
+| [PostgreSQl](https://www.postgresql.org/) | The World's Most Advanced Open Source Relational Database                                              | :white_check_mark: | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_postgresql/README.md) |
+| [Prisma](https://www.prisma.io/)          | Next-generation Node.js and TypeScript ORM                                                             | :white_check_mark: | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_prisma/README.md)     |
+| [NestJS Server](https://nestjs.com/)      | A progressive Node.js framework for building efficient, reliable and scalable server-side applications | :construction:     | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_nestjs/README.md)     |
 
 ## API
 
