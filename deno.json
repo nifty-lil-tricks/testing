@@ -32,6 +32,7 @@
     ]
   },
   "tasks": {
+    "clean": "rm -rf ./cov && rm -rf ./html_cov && rm -rf ./npm",
     "test": "deno test --doc --allow-all --coverage=./cov",
     "test:browser": "git grep --name-only \"This module is browser compatible.\" | grep -v deno.json | grep -v .github/workflows | grep -v _tools | xargs deno check --config browser-compat.tsconfig.json",
     "fmt:licence-headers": "deno run --allow-read --allow-write ./_tools/check_licence.ts",
@@ -41,7 +42,7 @@
     "lint": "deno lint && deno fmt --check && deno task fmt:licence-headers --check && deno task lint:deprecations && deno task lint:doc-imports && deno task lint:check-assertions",
     "pre-commit": "deno task lint && deno task test",
     "build": "deno run -A scripts/build_npm.ts",
-    "cov": "deno task test && deno coverage ./cov --lcov --output=cov.lcov",
+    "cov": "deno task clean && deno task test && deno coverage ./cov --lcov --output=cov.lcov",
     "cov:check": "deno task cov && lcov --summary cov.lcov --fail-under-lines 100",
     "report": "deno task cov && genhtml -o html_cov cov.lcov && open html_cov/index.html"
   }

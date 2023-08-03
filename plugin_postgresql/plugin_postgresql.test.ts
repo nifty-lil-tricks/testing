@@ -20,26 +20,27 @@ import {
   type SetupTestsTeardown,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import {
-  type PostgresqlDatabaseServerPlugin,
-  postgresqlDatabaseServerPlugin,
+  type PostgreSqlDatabaseServerPlugin,
+  postgreSqlDatabaseServerPlugin,
 } from "./plugin_postgresql.ts";
 import { DenoCommand } from "./plugin_postgresql.utils.ts";
 import { type SetupTestsFn } from "../setup_tests.type.ts";
+import { PostgreSqlDatabaseDockerServerError } from "./plugin_postgresql_docker.strategy.ts";
 
 const ignore = Deno.env.get("IGNORE_DOCKER_TESTS") === "true";
 
 // Then one can use this in any test file as follows:
-describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
+describe("postgreSqlDatabaseServerPlugin", { ignore }, () => {
   let teardownTests: SetupTestsTeardown;
   let consoleWarnStub: Stub<Console>;
   let setupTests: SetupTestsFn<
-    { databaseServer: PostgresqlDatabaseServerPlugin }
+    { databaseServer: PostgreSqlDatabaseServerPlugin }
   >;
   const strategies = ["docker"] as const;
 
   beforeAll(() => {
     const result = setupTestsFactory({
-      databaseServer: postgresqlDatabaseServerPlugin,
+      databaseServer: postgreSqlDatabaseServerPlugin,
     });
     setupTests = result.setupTests;
   });
@@ -60,7 +61,7 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
   strategies.forEach((strategy) => {
     describe(`with ${strategy} strategy`, () => {
       describe("setupTests", () => {
-        it("should setup tests with a postgresql database server", async () => {
+        it("should setup tests with a PostgreSQL database server", async () => {
           // Arrange & Act
           const result = await setupTests({
             databaseServer: {
@@ -75,20 +76,94 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
             {
               args: [
                 "inspect",
-                result.outputs.databaseServer.output.containerId,
+                result.outputs.databaseServer.output.instanceId,
               ],
             },
           ).output();
           const details = JSON.parse(
             new TextDecoder().decode(rawDetails.stdout).trim(),
           );
-          const { containerId, connection } =
+          const { instanceId, connection } =
             result.outputs.databaseServer.output;
-          assertEquals(details?.[0]?.Id, containerId);
+          assertEquals(details?.[0]?.Id, instanceId);
           const client = new Client({ ...connection, tls: { enabled: false } });
           await client.connect();
           await client.end();
           assertSpyCalls(consoleWarnStub, 0);
+        });
+
+        it("should setup tests with a PostgreSQL database server exposed on a specific host IP", async () => {
+          // Arrange
+          const mockHostIp = "1.2.3.4";
+          const denoCommandOutputStub = stub(
+            DenoCommand.prototype,
+            "output",
+            () => {
+              return Promise.resolve({
+                code: 0,
+                success: true,
+                stdout: new TextEncoder().encode(JSON.stringify([{
+                  NetworkSettings: {
+                    Ports: {
+                      "5432/tcp": [{ HostIp: "1.2.3.4", HostPort: 1234 }],
+                    },
+                  },
+                }])),
+                stderr: new TextEncoder().encode(""),
+              });
+            },
+          );
+
+          // Act
+          try {
+            const result = await setupTests({ databaseServer: { strategy } });
+
+            // Assert
+            assertEquals(
+              result.outputs.databaseServer.output.connection.hostname,
+              mockHostIp,
+            );
+          } finally {
+            denoCommandOutputStub.restore();
+          }
+        });
+
+        it("should setup tests with a PostgreSQL database server exposed on a defined port", async () => {
+          // Arrange
+          const port = 7777;
+          const denoCommandOutputStub = stub(
+            DenoCommand.prototype,
+            "output",
+            () => {
+              return Promise.resolve({
+                code: 0,
+                success: true,
+                stdout: new TextEncoder().encode(JSON.stringify([{
+                  NetworkSettings: {
+                    Ports: {
+                      "5432/tcp": [{ HostIp: "1.2.3.4", HostPort: port }],
+                    },
+                  },
+                }])),
+                stderr: new TextEncoder().encode(""),
+              });
+            },
+          );
+
+          // Act
+          try {
+            const result = await setupTests({
+              databaseServer: { strategy, port },
+            });
+
+            // Assert
+            assertEquals(
+              result.outputs.databaseServer.output.connection.port,
+              port,
+            );
+          } finally {
+            denoCommandOutputStub.restore();
+          }
         });
 
         it("should error if docker is not running or available", async () => {
@@ -115,6 +190,164 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
           assertSpyCalls(denoCommandOutputStub, 1);
         });
 
+        it("should error if the exposed port is not defined", async () => {
+          // Arrange
+          const denoCommandOutputStub = stub(
+            DenoCommand.prototype,
+            "output",
+            () => {
+              return Promise.resolve({
+                code: 0,
+                success: true,
+                stdout: new TextEncoder().encode(JSON.stringify([{
+                  NetworkSettings: {
+                    Ports: {
+                      "5432/tcp": [{ HostIp: "0.0.0.0" }],
+                    },
+                  },
+                }])),
+                stderr: new TextEncoder().encode(""),
+              });
+            },
+          );
+          try {
+            // Act & Assert
+            await assertRejects(
+              () =>
+                setupTests({
+                  databaseServer: {
+                    strategy,
+                  },
+                }),
+              PostgreSqlDatabaseDockerServerError,
+              "PostgreSQL Docker server is not exposed on a valid port: undefined",
+            );
+          } finally {
+            denoCommandOutputStub.restore();
+          }
+          assertSpyCalls(consoleWarnStub, 0);
+          assertSpyCalls(denoCommandOutputStub, 2);
+        });
+
+        it("should error if the docker start command fails", async () => {
+          // Arrange
+          const mockExitCode = 7;
+          const mockStderr = "kaboom";
+          const denoCommandOutputStub = stub(
+            DenoCommand.prototype,
+            "output",
+            () => {
+              return Promise.resolve({
+                code: mockExitCode,
+                success: false,
+                stdout: new TextEncoder().encode(""),
+                stderr: new TextEncoder().encode(mockStderr),
+              });
+            },
+          );
+          try {
+            // Act & Assert
+            await assertRejects(
+              () =>
+                setupTests({
+                  databaseServer: {
+                    strategy,
+                  },
+                }),
+              PostgreSqlDatabaseDockerServerError,
+              `Error starting PostgreSQL database server (exit code: ${mockExitCode}): ${mockStderr}`,
+            );
+          } finally {
+            denoCommandOutputStub.restore();
+          }
+          assertSpyCalls(consoleWarnStub, 0);
+          assertSpyCalls(denoCommandOutputStub, 1);
+        });
+
+        it("should error if the docker inspect command fails", async () => {
+          // Arrange
+          const mockExitCode = 7;
+          const mockStderr = "kaboom";
+          let count = 1;
+          const denoCommandOutputStub = stub(
+            DenoCommand.prototype,
+            "output",
+            () => {
+              if (count === 1) {
+                count++;
+                return Promise.resolve({
+                  code: 0,
+                  success: true,
+                  stdout: new TextEncoder().encode(""),
+                  stderr: new TextEncoder().encode(""),
+                });
+              }
+              return Promise.resolve({
+                code: mockExitCode,
+                success: false,
+                stdout: new TextEncoder().encode(""),
+                stderr: new TextEncoder().encode(mockStderr),
+              });
+            },
+          );
+          try {
+            // Act & Assert
+            await assertRejects(
+              () =>
+                setupTests({
+                  databaseServer: {
+                    strategy,
+                  },
+                }),
+              PostgreSqlDatabaseDockerServerError,
+              `Error inspecting PostgreSQL database server (exit code: ${mockExitCode}): ${mockStderr}`,
+            );
+          } finally {
+            denoCommandOutputStub.restore();
+          }
+          assertSpyCalls(consoleWarnStub, 0);
+          assertSpyCalls(denoCommandOutputStub, 2);
+        });
+
+        it("should error if the exposed hostname is not defined", async () => {
+          // Arrange
+          const denoCommandOutputStub = stub(
+            DenoCommand.prototype,
+            "output",
+            () => {
+              return Promise.resolve({
+                code: 0,
+                success: true,
+                stdout: new TextEncoder().encode(JSON.stringify([{
+                  NetworkSettings: {
+                    Ports: {
+                      "5432/tcp": [{ HostPort: 9999 }],
+                    },
+                  },
+                }])),
+                stderr: new TextEncoder().encode(""),
+              });
+            },
+          );
+          try {
+            // Act & Assert
+            await assertRejects(
+              () =>
+                setupTests({
+                  databaseServer: {
+                    strategy,
+                  },
+                }),
+              PostgreSqlDatabaseDockerServerError,
+              "PostgreSQL Docker server is not exposed on a valid hostname: undefined",
+            );
+          } finally {
+            denoCommandOutputStub.restore();
+          }
+          assertSpyCalls(consoleWarnStub, 0);
+          assertSpyCalls(denoCommandOutputStub, 2);
+        });
+
         it("should error if an unknown strategy is provided", async () => {
           // Arrange, Act & Assert
           await assertRejects(() =>
@@ -129,7 +362,7 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
       });
 
       describe("teardownTests", () => {
-        it("should teardown tests with a postgresql database server", async () => {
+        it("should teardown tests with a PostgreSQL database server", async () => {
           // Arrange
           const result = await setupTests({
             databaseServer: {
@@ -148,7 +381,7 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
               args: [
                 "inspect",
                 '--format="{{.ID}}"',
-                result.outputs.databaseServer.output.containerId,
+                result.outputs.databaseServer.output.instanceId,
               ],
             },
           ).output();
@@ -186,7 +419,7 @@ describe("postgresqlDatabaseServerPlugin", { ignore }, () => {
           assertSpyCallArgs(
             consoleWarnStub,
             0,
-            ["Error tearing down postgresql database server", expectedError],
+            ["Error tearing down PostgreSQL database server", expectedError],
           );
         });
       });

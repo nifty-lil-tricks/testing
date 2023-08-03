@@ -5,53 +5,128 @@ import type {
   SetupTestsPluginInstance,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import {
-  PostgresqlDatabaseDockerServer,
-  PostgresqlDatabaseDockerServerConfig,
+  PostgreSqlDatabaseDockerServer,
+  PostgreSqlDatabaseDockerServerConfig,
 } from "./plugin_postgresql_docker.strategy.ts";
 
 // TODO: type file
-export type PostgresqlDatabaseServerPluginStrategy = "docker";
+export type PostgreSqlDatabaseServerPluginStrategy = "docker";
 
-export interface PostgresqlDatabaseServerPluginConfig {
-  strategy: PostgresqlDatabaseServerPluginStrategy;
+/**
+ * PostgreSQL Database Server Plugin Config
+ */
+export interface PostgreSqlDatabaseServerPluginConfig {
+  /**
+   * The strategy to use for setting up the database server.
+   *
+   * Available strategies:
+   *  - `docker`
+   */
+  strategy: PostgreSqlDatabaseServerPluginStrategy;
+  /**
+   * The prefix to use for the database server name.
+   * @default "postgres"
+   */
   databaseServerNamePrefix?: string;
+  /**
+   * The prefix to use for the database name.
+   * @default "postgres"
+   */
   databaseNamePrefix?: string;
+  /**
+   * The name of the database to use.
+   *
+   * If not provided, a random name will be generated.
+   */
   databaseName?: string;
+  /**
+   * The port to use for the database server.
+   *
+   * If not provided, a random available port will be used.
+   */
   port?: number;
+  /**
+   * The password to use for the database server.
+   *
+   * If not provided, a random password will be generated.
+   */
   password?: string;
+  /**
+   * The user to use for the database server.
+   *
+   * If not provided, a random user will be generated.
+   */
   user?: string;
+  /**
+   * The PostgreSQL version of the database server to use.
+   *
+   * @default "latest"
+   */
   version?: string;
 }
 
-export interface PostgresqlDatabaseServerPluginConnection {
+/**
+ * PostgreSQL Database Server Plugin Connection
+ */
+export interface PostgreSqlDatabaseServerPluginConnection {
+  /**
+   * The name of the database server.
+   */
   serverName: string;
+  /**
+   * The hostname of the database server.
+   */
   hostname: string;
+  /**
+   * The port of the database server.
+   */
   port: number;
+  /**
+   * The name of the database user.
+   */
   user: string;
+  /**
+   * The password of the database user.
+   */
   password: string;
+  /**
+   * The name of the database.
+   */
   database: string;
 }
 
-export interface PostgresqlDatabaseServerPluginResult {
-  containerId: string;
-  connection: PostgresqlDatabaseServerPluginConnection;
+/**
+ * PostgreSQL Database Server Plugin Result
+ */
+export interface PostgreSqlDatabaseServerPluginResult {
+  /**
+   * The ID of the PostgreSQL instance.
+   */
+  instanceId: string;
+  /**
+   * The connection details for the PostgreSQL instance.
+   */
+  connection: PostgreSqlDatabaseServerPluginConnection;
 }
 
-export type PostgresqlDatabaseServerPlugin = SetupTestsPlugin<
-  PostgresqlDatabaseServerPluginConfig,
-  PostgresqlDatabaseServerPluginResult
+export type PostgreSqlDatabaseServerPlugin = SetupTestsPlugin<
+  PostgreSqlDatabaseServerPluginConfig,
+  PostgreSqlDatabaseServerPluginResult
 >;
 
-export interface PostgresqlDatabaseServer {
+export interface PostgreSqlDatabaseServer {
   setup(): Promise<
-    SetupTestsPluginInstance<PostgresqlDatabaseServerPluginResult>
+    SetupTestsPluginInstance<PostgreSqlDatabaseServerPluginResult>
   >;
 }
 
-export const postgresqlDatabaseServerPlugin: PostgresqlDatabaseServerPlugin = {
+/**
+ * PostgreSQL Database Server Plugin
+ */
+export const postgreSqlDatabaseServerPlugin: PostgreSqlDatabaseServerPlugin = {
   setup(
-    config: PostgresqlDatabaseServerPluginConfig,
-  ): Promise<SetupTestsPluginInstance<PostgresqlDatabaseServerPluginResult>> {
+    config: PostgreSqlDatabaseServerPluginConfig,
+  ): Promise<SetupTestsPluginInstance<PostgreSqlDatabaseServerPluginResult>> {
     const suffix = Math.random().toString(36).substring(2);
     const database = config.databaseName ||
       `${config.databaseNamePrefix || "postgres"}-${suffix}`;
@@ -66,7 +141,7 @@ export const postgresqlDatabaseServerPlugin: PostgresqlDatabaseServerPlugin = {
 
     switch (config.strategy) {
       case "docker": {
-        const dockerConfig: PostgresqlDatabaseDockerServerConfig = {
+        const dockerConfig: PostgreSqlDatabaseDockerServerConfig = {
           serverName,
           port,
           user,
@@ -74,9 +149,9 @@ export const postgresqlDatabaseServerPlugin: PostgresqlDatabaseServerPlugin = {
           database,
           version,
         };
-        const postgresqlDatabaseDockerServer =
-          new PostgresqlDatabaseDockerServer(dockerConfig);
-        return postgresqlDatabaseDockerServer.setup();
+        const postgreSqlDatabaseDockerServer =
+          new PostgreSqlDatabaseDockerServer(dockerConfig);
+        return postgreSqlDatabaseDockerServer.setup();
       }
       default: {
         return assertNever(

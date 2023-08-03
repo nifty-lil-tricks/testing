@@ -34,7 +34,7 @@ const packages: Package[] = [
   {
     name: "@nifty-lil-tricks/testing-plugin-postgresql",
     description:
-      "A nifty li'l plugin for setting up postgresql database instances when testing",
+      "A nifty li'l plugin for setting up PostgreSQL database instances when testing",
     dir: join(rootDir, "plugin_postgresql"),
     tags: ["postgresql"],
     test: false,

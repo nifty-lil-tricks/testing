@@ -5,41 +5,42 @@ import {
   type SetupTestsPluginInstance,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import type {
-  PostgresqlDatabaseServer,
-  PostgresqlDatabaseServerPluginConnection,
+  PostgreSqlDatabaseServer,
+  PostgreSqlDatabaseServerPluginConnection,
 } from "./plugin_postgresql.ts";
 import { DenoCommand } from "./plugin_postgresql.utils.ts";
 
-export interface PostgresqlDatabaseDockerServerConfig
-  extends Omit<PostgresqlDatabaseDockerServerPluginConnection, "hostname"> {
+export interface PostgreSqlDatabaseDockerServerConfig
+  extends Omit<PostgreSqlDatabaseDockerServerPluginConnection, "hostname"> {
   version: string;
 }
 
-export type PostgresqlDatabaseDockerServerPluginConnection =
-  PostgresqlDatabaseServerPluginConnection;
+export type PostgreSqlDatabaseDockerServerPluginConnection =
+  PostgreSqlDatabaseServerPluginConnection;
 
-export interface PostgresqlDatabaseDockerServerResult {
-  containerId: string;
-  connection: PostgresqlDatabaseDockerServerPluginConnection;
+export interface PostgreSqlDatabaseDockerServerResult {
+  instanceId: string;
+  connection: PostgreSqlDatabaseDockerServerPluginConnection;
 }
 
-export type PostgresqlDatabaseDockerServerPlugin = SetupTestsPlugin<
-  PostgresqlDatabaseDockerServerConfig,
-  PostgresqlDatabaseDockerServerResult
+export type PostgreSqlDatabaseDockerServerPlugin = SetupTestsPlugin<
+  PostgreSqlDatabaseDockerServerConfig,
+  PostgreSqlDatabaseDockerServerResult
 >;
 
-/**
- * Hi
- */
-export class PostgresqlDatabaseDockerServer
-  implements PostgresqlDatabaseServer {
-  #config: PostgresqlDatabaseDockerServerConfig;
-  constructor(config: PostgresqlDatabaseDockerServerConfig) {
+export class PostgreSqlDatabaseDockerServerError extends Error {
+  override name = "PostgreSqlDatabaseDockerServerError";
+}
+
+export class PostgreSqlDatabaseDockerServer
+  implements PostgreSqlDatabaseServer {
+  #config: PostgreSqlDatabaseDockerServerConfig;
+  constructor(config: PostgreSqlDatabaseDockerServerConfig) {
     this.#config = config;
   }
 
   async setup(): Promise<
-    SetupTestsPluginInstance<PostgresqlDatabaseDockerServerResult>
+    SetupTestsPluginInstance<PostgreSqlDatabaseDockerServerResult>
   > {
     const dbServerStartCommandArgs = [
       "run",
@@ -61,25 +62,46 @@ export class PostgresqlDatabaseDockerServer
       { args: dbServerStartCommandArgs },
     );
     const raw = await runDbServerStart.output();
-    // TODO: check for errors
+    const runDbServerExitCode = raw.code;
+    if (runDbServerExitCode !== 0) {
+      const stderr = new TextDecoder().decode(raw.stderr);
+      throw new PostgreSqlDatabaseDockerServerError(
+        `Error starting PostgreSQL database server (exit code: ${runDbServerExitCode}): ${stderr}`,
+      );
+    }
     const containerId = new TextDecoder().decode(raw.stdout).trim();
     const rawDetails = await new DenoCommand(
       "docker",
       { args: ["inspect", containerId] },
     ).output();
+    const inspectDbServerExitCode = rawDetails.code;
+    if (inspectDbServerExitCode !== 0) {
+      const stderr = new TextDecoder().decode(rawDetails.stderr);
+      throw new PostgreSqlDatabaseDockerServerError(
+        `Error inspecting PostgreSQL database server (exit code: ${inspectDbServerExitCode}): ${stderr}`,
+      );
+    }
     const details = JSON.parse(new TextDecoder().decode(rawDetails.stdout));
     const networkSettings = details?.[0]?.NetworkSettings?.Ports?.["5432/tcp"];
-    const port = Number(networkSettings?.[0]?.HostPort);
-    // const hostname = networkSettings?.[0]?.HostIp;
-    const hostname = "localhost";
-    if (Number.isNaN(port) || !hostname) {
-      throw new Error("kaboom");
+    const exposedHostIp = networkSettings?.[0]?.HostIp;
+    const exposedHostPort = networkSettings?.[0]?.HostPort;
+    const port = Number(exposedHostPort);
+    const hostname = exposedHostIp === "0.0.0.0" ? "localhost" : exposedHostIp;
+    if (Number.isNaN(port)) {
+      throw new PostgreSqlDatabaseDockerServerError(
+        `PostgreSQL Docker server is not exposed on a valid port: ${exposedHostPort}`,
+      );
+    }
+    if (!hostname) {
+      throw new PostgreSqlDatabaseDockerServerError(
+        `PostgreSQL Docker server is not exposed on a valid hostname: ${hostname}`,
+      );
     }
     await this.#isDbHealthy(containerId);
     return {
       teardown: this.#teardown.bind(this, containerId),
       output: {
-        containerId,
+        instanceId: containerId,
         connection: {
           serverName: this.#config.serverName,
           hostname,
@@ -103,7 +125,7 @@ export class PostgresqlDatabaseDockerServer
         { args: ["rm", containerId] },
       ).output();
     } catch (error) {
-      console.warn("Error tearing down postgresql database server", error);
+      console.warn("Error tearing down PostgreSQL database server", error);
     }
   }
 

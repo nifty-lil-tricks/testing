@@ -14,20 +14,20 @@ import {
   type SetupTestsTeardown,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import {
-  postgresqlDatabaseServerPlugin,
-  type PostgresqlDatabaseServerPluginConnection,
+  postgreSqlDatabaseServerPlugin,
+  type PostgreSqlDatabaseServerPluginConnection,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
 
 // In another file, load plugins as follows to generate a setupTests function:
 export const { setupTests } = setupTestsFactory({
-  databaseServer: postgresqlDatabaseServerPlugin,
+  databaseServer: postgreSqlDatabaseServerPlugin,
 });
 
 // Then one can use this in any test file as follows:
 describe("Service", () => {
   let teardownAllTests: SetupTestsTeardown;
   let teardownEachTest: SetupTestsTeardown;
-  let connection: PostgresqlDatabaseServerPluginConnection;
+  let connection: PostgreSqlDatabaseServerPluginConnection;
 
   beforeAll(async () => {
     // Setup tests
