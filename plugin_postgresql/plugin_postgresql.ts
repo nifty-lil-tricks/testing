@@ -5,12 +5,21 @@ import type {
   SetupTestsPluginInstance,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import {
-  PostgreSqlDatabaseDockerServer,
-  PostgreSqlDatabaseDockerServerConfig,
+  PostgreSqlDatabaseDockerStrategy,
+  type PostgreSqlDatabaseDockerStrategyConfig,
 } from "./plugin_postgresql_docker.strategy.ts";
+import { PostgreSqlDatabaseConnectionStrategy } from "./plugin_postgresql_connection.strategy.ts";
+import { assertNever } from "./plugin_postgresql.utils.ts";
 
 // TODO: type file
-export type PostgreSqlDatabaseServerPluginStrategy = "docker";
+/**
+ * The strategy to use for setting up the database server.
+ */
+export type PostgreSqlDatabaseServerStrategy = "docker";
+
+export interface PostgreSqlDatabaseStrategyContract {
+  setup(): Promise<SetupTestsPluginInstance<PostgreSqlDatabaseServer>>;
+}
 
 /**
  * PostgreSQL Database Server Plugin Config
@@ -22,7 +31,7 @@ export interface PostgreSqlDatabaseServerPluginConfig {
    * Available strategies:
    *  - `docker`
    */
-  strategy: PostgreSqlDatabaseServerPluginStrategy;
+  strategy: PostgreSqlDatabaseServerStrategy;
   /**
    * The prefix to use for the database server name.
    * @default "postgres"
@@ -95,53 +104,71 @@ export interface PostgreSqlDatabaseServerPluginConnection {
   database: string;
 }
 
+export interface PostgreSqlDatabasePluginConfig {
+  server: PostgreSqlDatabaseServerPluginConfig | PostgreSqlDatabaseServer;
+  // TODO: migrate
+  // deno-lint-ignore no-explicit-any
+  migrate?: any;
+  // TODO: seed
+  // deno-lint-ignore no-explicit-any
+  seed?: any;
+}
+
+export type PostgreSqlDatabasePlugin = SetupTestsPlugin<
+  PostgreSqlDatabasePluginConfig,
+  PostgreSqlDatabaseServer
+>;
+
 /**
- * PostgreSQL Database Server Plugin Result
+ * PostgreSQL Database Server
  */
-export interface PostgreSqlDatabaseServerPluginResult {
+export class PostgreSqlDatabaseServer {
+  constructor(
+    instanceId: string,
+    connection: PostgreSqlDatabaseServerPluginConnection,
+  ) {
+    this.instanceId = instanceId;
+    this.connection = connection;
+  }
+
   /**
    * The ID of the PostgreSQL instance.
    */
-  instanceId: string;
+  public readonly instanceId: string;
+
   /**
    * The connection details for the PostgreSQL instance.
    */
-  connection: PostgreSqlDatabaseServerPluginConnection;
-}
-
-export type PostgreSqlDatabaseServerPlugin = SetupTestsPlugin<
-  PostgreSqlDatabaseServerPluginConfig,
-  PostgreSqlDatabaseServerPluginResult
->;
-
-export interface PostgreSqlDatabaseServer {
-  setup(): Promise<
-    SetupTestsPluginInstance<PostgreSqlDatabaseServerPluginResult>
-  >;
+  public readonly connection: PostgreSqlDatabaseServerPluginConnection;
 }
 
 /**
- * PostgreSQL Database Server Plugin
+ * PostgreSQL Database Plugin
  */
-export const postgreSqlDatabaseServerPlugin: PostgreSqlDatabaseServerPlugin = {
+export const postgreSqlDatabasePlugin: PostgreSqlDatabasePlugin = {
   setup(
-    config: PostgreSqlDatabaseServerPluginConfig,
-  ): Promise<SetupTestsPluginInstance<PostgreSqlDatabaseServerPluginResult>> {
-    const suffix = Math.random().toString(36).substring(2);
-    const database = config.databaseName ||
-      `${config.databaseNamePrefix || "postgres"}-${suffix}`;
-    const serverName = `${
-      config.databaseServerNamePrefix || "postgres"
-    }-${suffix}`;
-    const port = config.port ?? 0;
-    const user = config.user ?? Math.random().toString(36).substring(2);
-    const password = config.password ??
-      Math.random().toString(36).substring(2);
-    const version = config.version || "latest";
+    config: PostgreSqlDatabasePluginConfig,
+  ): Promise<SetupTestsPluginInstance<PostgreSqlDatabaseServer>> {
+    if (config.server instanceof PostgreSqlDatabaseServer) {
+      const strategy = new PostgreSqlDatabaseConnectionStrategy(config.server);
+      return strategy.setup();
+    }
 
-    switch (config.strategy) {
+    const suffix = Math.random().toString(36).substring(2);
+    const database = config.server.databaseName ||
+      `${config.server.databaseNamePrefix || "postgres"}-${suffix}`;
+    const serverName = `${
+      config.server.databaseServerNamePrefix || "postgres"
+    }-${suffix}`;
+    const port = config.server.port ?? 0;
+    const user = config.server.user ?? Math.random().toString(36).substring(2);
+    const password = config.server.password ??
+      Math.random().toString(36).substring(2);
+    const version = config.server.version || "latest";
+
+    switch (config.server.strategy) {
       case "docker": {
-        const dockerConfig: PostgreSqlDatabaseDockerServerConfig = {
+        const dockerConfig: PostgreSqlDatabaseDockerStrategyConfig = {
           serverName,
           port,
           user,
@@ -149,20 +176,15 @@ export const postgreSqlDatabaseServerPlugin: PostgreSqlDatabaseServerPlugin = {
           database,
           version,
         };
-        const postgreSqlDatabaseDockerServer =
-          new PostgreSqlDatabaseDockerServer(dockerConfig);
-        return postgreSqlDatabaseDockerServer.setup();
+        const strategy = new PostgreSqlDatabaseDockerStrategy(dockerConfig);
+        return strategy.setup();
       }
       default: {
         return assertNever(
-          config.strategy,
-          `Unknown strategy: ${config.strategy}`,
+          config.server.strategy,
+          `Unknown strategy: ${config.server.strategy}`,
         );
       }
     }
   },
 };
-
-function assertNever(_input: never, message: string): never {
-  throw new Error(message);
-}

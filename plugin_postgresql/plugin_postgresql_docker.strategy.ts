@@ -1,46 +1,33 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
 import {
-  type SetupTestsPlugin,
   type SetupTestsPluginInstance,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
-import type {
+import {
   PostgreSqlDatabaseServer,
-  PostgreSqlDatabaseServerPluginConnection,
+  type PostgreSqlDatabaseServerPluginConnection,
+  type PostgreSqlDatabaseStrategyContract,
 } from "./plugin_postgresql.ts";
 import { DenoCommand } from "./plugin_postgresql.utils.ts";
 
-export interface PostgreSqlDatabaseDockerServerConfig
-  extends Omit<PostgreSqlDatabaseDockerServerPluginConnection, "hostname"> {
+export interface PostgreSqlDatabaseDockerStrategyConfig
+  extends Omit<PostgreSqlDatabaseServerPluginConnection, "hostname"> {
   version: string;
 }
-
-export type PostgreSqlDatabaseDockerServerPluginConnection =
-  PostgreSqlDatabaseServerPluginConnection;
-
-export interface PostgreSqlDatabaseDockerServerResult {
-  instanceId: string;
-  connection: PostgreSqlDatabaseDockerServerPluginConnection;
-}
-
-export type PostgreSqlDatabaseDockerServerPlugin = SetupTestsPlugin<
-  PostgreSqlDatabaseDockerServerConfig,
-  PostgreSqlDatabaseDockerServerResult
->;
 
 export class PostgreSqlDatabaseDockerServerError extends Error {
   override name = "PostgreSqlDatabaseDockerServerError";
 }
 
-export class PostgreSqlDatabaseDockerServer
-  implements PostgreSqlDatabaseServer {
-  #config: PostgreSqlDatabaseDockerServerConfig;
-  constructor(config: PostgreSqlDatabaseDockerServerConfig) {
+export class PostgreSqlDatabaseDockerStrategy
+  implements PostgreSqlDatabaseStrategyContract {
+  #config: PostgreSqlDatabaseDockerStrategyConfig;
+  constructor(config: PostgreSqlDatabaseDockerStrategyConfig) {
     this.#config = config;
   }
 
   async setup(): Promise<
-    SetupTestsPluginInstance<PostgreSqlDatabaseDockerServerResult>
+    SetupTestsPluginInstance<PostgreSqlDatabaseServer>
   > {
     const dbServerStartCommandArgs = [
       "run",
@@ -100,17 +87,14 @@ export class PostgreSqlDatabaseDockerServer
     await this.#isDbHealthy(containerId);
     return {
       teardown: this.#teardown.bind(this, containerId),
-      output: {
-        instanceId: containerId,
-        connection: {
-          serverName: this.#config.serverName,
-          hostname,
-          port,
-          user: this.#config.user,
-          password: this.#config.password,
-          database: this.#config.database,
-        },
-      },
+      output: new PostgreSqlDatabaseServer(containerId, {
+        serverName: this.#config.serverName,
+        hostname,
+        port,
+        user: this.#config.user,
+        password: this.#config.password,
+        database: this.#config.database,
+      }),
     };
   }
 
