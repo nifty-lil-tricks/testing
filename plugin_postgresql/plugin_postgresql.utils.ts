@@ -25,7 +25,7 @@ export class DenoCommand {
   async output(): Promise<DenoCommandOutput> {
     // deno-lint-ignore no-deprecated-deno-api
     const runResult = await Deno.run({
-      cmd: [this.#command, ...this.#options.args ?? []],
+      cmd: [this.#command, ...this.#options.args],
       stdout: "piped",
       stderr: "piped",
     });

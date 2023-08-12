@@ -45,13 +45,6 @@ const packages: Package[] = [
       },
     } as SpecifierMappings,
   },
-  {
-    name: "@nifty-lil-tricks/testing-plugin-prisma",
-    description:
-      "A nifty li'l plugin for setting up a database with prisma when testing",
-    dir: join(rootDir, "plugin_prisma"),
-    tags: ["prisma"],
-  },
 ];
 
 let filteredPackages = packages;
