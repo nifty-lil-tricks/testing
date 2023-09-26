@@ -1,5 +1,6 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
+import { expandGlob } from "std/fs/expand_glob.ts";
 import type {
   SetupTestsPlugin,
   SetupTestsPluginInstance,
@@ -10,6 +11,7 @@ import {
 } from "./plugin_postgresql_docker.strategy.ts";
 import { PostgreSqlDatabaseConnectionStrategy } from "./plugin_postgresql_connection.strategy.ts";
 import { assertNever } from "./plugin_postgresql.utils.ts";
+import { Client } from "x/postgres/client.ts";
 
 // TODO: type file
 /**
@@ -19,6 +21,27 @@ export type PostgreSqlDatabaseServerStrategy = "docker";
 
 export interface PostgreSqlDatabaseStrategyContract {
   setup(): Promise<SetupTestsPluginInstance<PostgreSqlDatabaseServer>>;
+}
+
+export const MigrationStatus = {
+  PENDING: "PENDING",
+  SUCCESS: "SUCCESS",
+  FAILURE: "FAILURE",
+};
+export type MigrationStatus = keyof typeof MigrationStatus;
+
+export interface MigrationResult {
+  status: MigrationStatus;
+  message: string;
+}
+
+export interface MigrationResults {
+  status: MigrationStatus;
+  results: MigrationResult[];
+}
+
+export interface MigrationStrategyContract {
+  run(): Promise<MigrationResults>;
 }
 
 /**
@@ -104,14 +127,37 @@ export interface PostgreSqlDatabaseServerPluginConnection {
   database: string;
 }
 
+// TODO: make types shorter because we can assume the context
+
+// TODO: docs
+export const MigrationStrategy = {
+  SQL: "SQL",
+} as const;
+export type MigrationStrategy = keyof typeof MigrationStrategy;
+
+export const MigrationOrderBy = {
+  FILENAME_DESC: "FILENAME_DESC",
+} as const;
+export type MigrationOrderBy = keyof typeof MigrationOrderBy;
+
+// TODO: maybe move to the root
+export type FunctionOrValue<V> = V | (() => Promise<V>) | (() => V);
+
+export interface MigrationSqlConfig {
+  strategy: Extract<MigrationStrategy, "SQL">;
+  // TODO: add later support
+  // files?: FunctionOrValue<string | string[]>;
+  // orderBy?: MigrationOrderBy;
+}
+
+export type MigrationConfig = MigrationSqlConfig;
+
+export type SeedConfig = Record<string, Record<string, unknown>[]>;
+
 export interface PostgreSqlDatabasePluginConfig {
   server: PostgreSqlDatabaseServerPluginConfig | PostgreSqlDatabaseServer;
-  // TODO: migrate
-  // deno-lint-ignore no-explicit-any
-  migrate?: any;
-  // TODO: seed
-  // deno-lint-ignore no-explicit-any
-  seed?: any;
+  migrate?: MigrationConfig;
+  seed?: SeedConfig;
 }
 
 export type PostgreSqlDatabasePlugin = SetupTestsPlugin<
@@ -146,7 +192,7 @@ export class PostgreSqlDatabaseServer {
  * PostgreSQL Database Plugin
  */
 export const postgreSqlDatabasePlugin: PostgreSqlDatabasePlugin = {
-  setup(
+  async setup(
     config: PostgreSqlDatabasePluginConfig,
   ): Promise<SetupTestsPluginInstance<PostgreSqlDatabaseServer>> {
     if (config.server instanceof PostgreSqlDatabaseServer) {
@@ -166,6 +212,7 @@ export const postgreSqlDatabasePlugin: PostgreSqlDatabasePlugin = {
       Math.random().toString(36).substring(2);
     const version = config.server.version || "latest";
 
+    let setup: SetupTestsPluginInstance<PostgreSqlDatabaseServer>;
     switch (config.server.strategy) {
       case "docker": {
         const dockerConfig: PostgreSqlDatabaseDockerStrategyConfig = {
@@ -177,7 +224,8 @@ export const postgreSqlDatabasePlugin: PostgreSqlDatabasePlugin = {
           version,
         };
         const strategy = new PostgreSqlDatabaseDockerStrategy(dockerConfig);
-        return strategy.setup();
+        setup = await strategy.setup();
+        break;
       }
       default: {
         return assertNever(
@@ -186,5 +234,65 @@ export const postgreSqlDatabasePlugin: PostgreSqlDatabasePlugin = {
         );
       }
     }
+
+    // Run migrations
+    if (config.migrate) {
+      switch (config.migrate.strategy) {
+        case MigrationStrategy.SQL: {
+          const files: string[] = [];
+          for await (const file of expandGlob("**\/migrations\/**\/*.sql")) {
+            files.push(file.path);
+          }
+          const client = new Client({
+            ...setup.output.connection,
+            tls: { enabled: false },
+          });
+          await client.connect();
+          for (const file of files) {
+            const query = await Deno.readTextFile(file);
+            // TODO: add result to output
+            await client.queryObject(query);
+          }
+          await client.end();
+          break;
+        }
+        default: {
+          return assertNever(
+            config.migrate.strategy,
+            `Unknown strategy: ${config.migrate.strategy}`,
+          );
+        }
+      }
+    }
+
+    // Run seed
+    if (config.seed) {
+      const client = new Client({
+        ...setup.output.connection,
+        tls: { enabled: false },
+      });
+      await client.connect();
+      for (const [table, rows] of Object.entries(config.seed)) {
+        const columns = Object.keys(rows[0]);
+        const queryValues: string[] = [];
+        const values: unknown[] = [];
+        let count = 1;
+        for (const row of rows) {
+          const queryValue: number[] = [];
+          for (const _ of Object.values(row)) {
+            queryValue.push(count);
+            count += 1;
+          }
+          queryValues.push(`(${queryValue.map(value => `$${value}`).join(',')})`);
+          values.push(...Object.values(row));
+        }
+        const query = `INSERT INTO "${table}" (${columns}) VALUES ${queryValues.join(', ')};`;
+        // TODO: add result to output
+        await client.queryObject(query, values);
+      }
+      await client.end();
+    }
+
+    return setup;
   },
 };

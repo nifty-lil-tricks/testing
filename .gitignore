@@ -11,3 +11,4 @@ node_modules/
 package-lock.json
 cov.lcov
 html_cov
+sandbox/
