@@ -7,7 +7,7 @@ import {
   PostgreSqlDatabaseServer,
   type PostgreSqlDatabaseServerPluginConnection,
   type PostgreSqlDatabaseStrategyContract,
-} from "./plugin_postgresql.ts";
+} from "./plugin.ts";
 import { DenoCommand } from "./plugin_postgresql.utils.ts";
 
 export interface PostgreSqlDatabaseDockerStrategyConfig

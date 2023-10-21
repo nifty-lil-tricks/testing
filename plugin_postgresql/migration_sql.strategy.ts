@@ -6,7 +6,7 @@ import {
   MigrationResult,
   MigrationStrategyContract,
   PostgreSqlDatabaseServerPluginConnection,
-} from "./plugin_postgresql.ts";
+} from "./plugin.ts";
 import { expandGlob } from "std/fs/expand_glob.ts";
 import { basename } from "std/path/mod.ts";
 

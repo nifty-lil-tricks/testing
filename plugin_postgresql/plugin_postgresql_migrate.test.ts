@@ -10,7 +10,7 @@ import {
   MigrationStrategy,
   postgreSqlDatabasePlugin,
   type PostgreSqlDatabaseServerStrategy,
-} from "./plugin_postgresql.ts";
+} from "./plugin.ts";
 import { assertRejects } from "https://deno.land/std@0.160.0/testing/asserts.ts";
 import { MigrationSqlError } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/migration_sql.strategy.ts";
 import { stub } from "std/testing/mock.ts";

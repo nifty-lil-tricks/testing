@@ -12,7 +12,7 @@ import {
   type SetupTestsTeardown,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import { postgreSqlDatabasePlugin } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
-import { PostgreSqlDatabaseServer } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/plugin_postgresql.ts";
+import { PostgreSqlDatabaseServer } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/plugin.ts";
 
 // In another file, load the postgreSql plugin as follows to generate a setupTests function:
 export const { setupTests } = setupTestsFactory({

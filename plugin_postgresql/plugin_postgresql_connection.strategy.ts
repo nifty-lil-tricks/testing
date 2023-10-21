@@ -6,7 +6,7 @@ import {
 import type {
   PostgreSqlDatabaseServer,
   PostgreSqlDatabaseStrategyContract,
-} from "./plugin_postgresql.ts";
+} from "./plugin.ts";
 
 export class PostgreSqlDatabaseConnectionStrategy
   implements PostgreSqlDatabaseStrategyContract {

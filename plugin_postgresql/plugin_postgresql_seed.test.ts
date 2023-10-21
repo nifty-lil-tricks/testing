@@ -11,7 +11,7 @@ import {
   MigrationStrategy,
   postgreSqlDatabasePlugin,
   type PostgreSqlDatabaseServerStrategy,
-} from "./plugin_postgresql.ts";
+} from "./plugin.ts";
 
 const ignore = Deno.env.get("IGNORE_DOCKER_TESTS") === "true";
 

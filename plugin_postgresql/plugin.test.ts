@@ -15,8 +15,9 @@ import {
   MigrationStrategy,
   type PostgreSqlDatabasePlugin,
   postgreSqlDatabasePlugin,
+  PostgreSqlDatabaseServer,
   type PostgreSqlDatabaseServerStrategy,
-} from "./plugin_postgresql.ts";
+} from "./plugin.ts";
 import { type SetupTestsFn, SetupTestsTeardown } from "../setup_tests.type.ts";
 
 describe("postgreSqlDatabasePlugin", () => {
@@ -58,9 +59,16 @@ describe("postgreSqlDatabasePlugin", () => {
 
     it("should error if unknown migration strategy is provided", async () => {
       // Arrange
-      const result = await setupTests({
-        database: { server: { strategy: "docker" } },
+      const server = new PostgreSqlDatabaseServer("instanceId", {
+        serverName: "serverName",
+        hostname: "hostname",
+        port: 1234,
+        user: "user",
+        password: "password",
+        database: "database",
       });
+      server.init = () => Promise.resolve();
+      const result = await setupTests({ database: { server } });
       teardownTests = result.teardownTests;
       const unknownStrategy = "unknown" as MigrationStrategy;
 

@@ -1,14 +1,7 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
 import { assertEquals } from "std/testing/asserts.ts";
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  it,
-} from "std/testing/bdd.ts";
+import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
@@ -16,7 +9,8 @@ import {
 import {
   postgreSqlDatabasePlugin,
   PostgreSqlDatabaseServer,
-} from "./plugin_postgresql.ts";
+} from "./plugin.ts";
+import { Stub, stub } from "std/testing/mock.ts";
 
 // Then one can use this in any test file as follows:
 describe("postgreSqlDatabasePlugin", () => {
@@ -25,32 +19,26 @@ describe("postgreSqlDatabasePlugin", () => {
     database: postgreSqlDatabasePlugin,
   });
   let server: PostgreSqlDatabaseServer;
-  let teardownServer = (() => {
-    // No-op in-case this is not set
-  }) as SetupTestsTeardown;
-
-  beforeAll(async () => {
-    const result = await setupTests({
-      database: { server: { strategy: "docker" } },
-    });
-    server = result.outputs.database.output.server;
-    teardownServer = result.teardownTests;
-  });
+  let serverInitStub: Stub<PostgreSqlDatabaseServer>;
 
   beforeEach(() => {
     teardownTests = (() => {
       // No-op in-case this is not set
     }) as SetupTestsTeardown;
+    server = new PostgreSqlDatabaseServer("instanceId", {
+      serverName: "serverName",
+      hostname: "hostname",
+      port: 1234,
+      user: "user",
+      password: "password",
+      database: "database",
+    });
+    serverInitStub = stub(server, "init");
   });
 
   afterEach(async () => {
     // Teardown each test
     await teardownTests();
-  });
-
-  afterAll(async () => {
-    // Teardown server
-    await teardownServer();
   });
 
   describe(`with existing server instance`, () => {
@@ -66,6 +54,7 @@ describe("postgreSqlDatabasePlugin", () => {
 
         // Assert
         assertEquals(result.outputs.database.output.server, server);
+        assertEquals(serverInitStub.calls.length, 1);
       });
     });
 
@@ -83,6 +72,7 @@ describe("postgreSqlDatabasePlugin", () => {
         const teardownResult = await result.teardownTests();
 
         // Assert
+        assertEquals(serverInitStub.calls.length, 1);
         assertEquals(teardownResult, undefined);
       });
     });

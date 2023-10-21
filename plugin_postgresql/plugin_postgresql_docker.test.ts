@@ -24,7 +24,7 @@ import {
   type PostgreSqlDatabasePlugin,
   postgreSqlDatabasePlugin,
   type PostgreSqlDatabaseServerStrategy,
-} from "./plugin_postgresql.ts";
+} from "./plugin.ts";
 import { DenoCommand } from "./plugin_postgresql.utils.ts";
 import { type SetupTestsFn } from "../setup_tests.type.ts";
 import { PostgreSqlDatabaseDockerServerError } from "./plugin_postgresql_docker.strategy.ts";

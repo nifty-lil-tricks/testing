@@ -7,7 +7,7 @@ import {
   SeedStrategyContract,
   SeedStrategyOutput,
   SeedStrategyResult,
-} from "./plugin_postgresql.ts";
+} from "./plugin.ts";
 
 export class SeedStrategy implements SeedStrategyContract {
   #config: SeedConfig;
