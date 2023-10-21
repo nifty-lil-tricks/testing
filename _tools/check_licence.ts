@@ -12,6 +12,7 @@ const EXCLUDED_DIRS = [
   "**/crypto/_wasm/lib",
   "**/node_modules",
   "**/npm",
+  "**/sandbox",
 ];
 
 const ROOT = new URL("../", import.meta.url);

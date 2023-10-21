@@ -1,7 +1,14 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
 import { assertEquals } from "std/testing/asserts.ts";
-import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  it,
+} from "std/testing/bdd.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
@@ -17,13 +24,17 @@ describe("postgreSqlDatabasePlugin", () => {
   const { setupTests } = setupTestsFactory({
     database: postgreSqlDatabasePlugin,
   });
-  const server = new PostgreSqlDatabaseServer("instanceId", {
-    serverName: "serverName",
-    hostname: "hostname",
-    port: 1234,
-    user: "user",
-    password: "password",
-    database: "database",
+  let server: PostgreSqlDatabaseServer;
+  let teardownServer = (() => {
+    // No-op in-case this is not set
+  }) as SetupTestsTeardown;
+
+  beforeAll(async () => {
+    const result = await setupTests({
+      database: { server: { strategy: "docker" } },
+    });
+    server = result.outputs.database.output.server;
+    teardownServer = result.teardownTests;
   });
 
   beforeEach(() => {
@@ -35,6 +46,11 @@ describe("postgreSqlDatabasePlugin", () => {
   afterEach(async () => {
     // Teardown each test
     await teardownTests();
+  });
+
+  afterAll(async () => {
+    // Teardown server
+    await teardownServer();
   });
 
   describe(`with existing server instance`, () => {
@@ -49,7 +65,7 @@ describe("postgreSqlDatabasePlugin", () => {
         teardownTests = result.teardownTests;
 
         // Assert
-        assertEquals(result.outputs.database.output, server);
+        assertEquals(result.outputs.database.output.server, server);
       });
     });
 

@@ -1,6 +1,5 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { expandGlob } from "std/fs/expand_glob.ts";
 import type {
   SetupTestsPlugin,
   SetupTestsPluginInstance,
@@ -11,6 +10,8 @@ import {
 } from "./plugin_postgresql_docker.strategy.ts";
 import { PostgreSqlDatabaseConnectionStrategy } from "./plugin_postgresql_connection.strategy.ts";
 import { assertNever } from "./plugin_postgresql.utils.ts";
+import { SeedStrategy } from "./seed.strategy.ts";
+import { MigrationSqlStrategy } from "./migration_sql.strategy.ts";
 import { Client } from "x/postgres/client.ts";
 
 // TODO: type file
@@ -23,25 +24,37 @@ export interface PostgreSqlDatabaseStrategyContract {
   setup(): Promise<SetupTestsPluginInstance<PostgreSqlDatabaseServer>>;
 }
 
-export const MigrationStatus = {
-  PENDING: "PENDING",
-  SUCCESS: "SUCCESS",
-  FAILURE: "FAILURE",
-};
-export type MigrationStatus = keyof typeof MigrationStatus;
-
-export interface MigrationResult {
-  status: MigrationStatus;
-  message: string;
+// TODO: type file
+// TODO: docs
+export interface SeedStrategyResult {
+  readonly query: string;
+  readonly args: string[];
+  readonly insertedCount?: number;
 }
 
-export interface MigrationResults {
-  status: MigrationStatus;
+export interface SeedStrategyOutput {
+  readonly results: SeedStrategyResult[];
+  readonly warnings: unknown[];
+}
+
+export interface SeedStrategyContract {
+  run(
+    connection: PostgreSqlDatabaseServerPluginConnection,
+  ): Promise<SeedStrategyOutput>;
+}
+
+export interface MigrationResult {
+  readonly name: string;
+  readonly message: string;
+  readonly details?: unknown;
+}
+
+export interface MigrationOutput {
   results: MigrationResult[];
 }
 
 export interface MigrationStrategyContract {
-  run(): Promise<MigrationResults>;
+  run(): Promise<MigrationOutput>;
 }
 
 /**
@@ -162,7 +175,7 @@ export interface PostgreSqlDatabasePluginConfig {
 
 export type PostgreSqlDatabasePlugin = SetupTestsPlugin<
   PostgreSqlDatabasePluginConfig,
-  PostgreSqlDatabaseServer
+  DatabasePluginResult
 >;
 
 /**
@@ -186,113 +199,142 @@ export class PostgreSqlDatabaseServer {
    * The connection details for the PostgreSQL instance.
    */
   public readonly connection: PostgreSqlDatabaseServerPluginConnection;
+
+  public async init(): Promise<void> {
+    let shouldReturn = false;
+    const client = new Client({
+      tls: { enabled: false },
+      ...this.connection,
+    });
+    while (shouldReturn === false) {
+      // Revert to try/catch/finally block for readability when the following is fixed:
+      // https://github.com/denoland/deno/issues/13781
+      await client.connect()
+        .then(() => shouldReturn = true)
+        .catch(() => new Promise((resolve) => setTimeout(resolve, 300)))
+        .finally(() => client.end());
+    }
+  }
+}
+
+/**
+ * PostgreSQL Database Plugin Result.
+ */
+export interface DatabasePluginResult {
+  /**
+   * The Database Server instance.
+   */
+  readonly server: PostgreSqlDatabaseServer;
+
+  /**
+   * The migration output.
+   */
+  readonly migrate: MigrationOutput;
+
+  /**
+   * The seed output.
+   */
+  readonly seed: SeedStrategyOutput;
+}
+
+class PostgreSqlDatabasePluginFactory {
+  public create(): PostgreSqlDatabasePlugin {
+    return {
+      setup: this.#setup.bind(this),
+    };
+  }
+
+  async #setup(
+    config: PostgreSqlDatabasePluginConfig,
+  ): Promise<SetupTestsPluginInstance<DatabasePluginResult>> {
+    let setup: SetupTestsPluginInstance<PostgreSqlDatabaseServer>;
+    if (config.server instanceof PostgreSqlDatabaseServer) {
+      const strategy = new PostgreSqlDatabaseConnectionStrategy(config.server);
+      setup = await strategy.setup();
+    } else {
+      const suffix = Math.random().toString(36).substring(2);
+      const database = config.server.databaseName ||
+        `${config.server.databaseNamePrefix || "postgres"}-${suffix}`;
+      const serverName = `${
+        config.server.databaseServerNamePrefix || "postgres"
+      }-${suffix}`;
+      const port = config.server.port ?? 0;
+      const user = config.server.user ??
+        Math.random().toString(36).substring(2);
+      const password = config.server.password ??
+        Math.random().toString(36).substring(2);
+      const version = config.server.version || "latest";
+
+      switch (config.server.strategy) {
+        case "docker": {
+          const dockerConfig: PostgreSqlDatabaseDockerStrategyConfig = {
+            serverName,
+            port,
+            user,
+            password,
+            database,
+            version,
+          };
+          const strategy = new PostgreSqlDatabaseDockerStrategy(dockerConfig);
+          setup = await strategy.setup();
+          break;
+        }
+        default: {
+          return assertNever(
+            config.server.strategy,
+            `Unknown strategy: ${config.server.strategy}`,
+          );
+        }
+      }
+    }
+    const { output: server, teardown } = setup;
+    await server.init();
+
+    return {
+      teardown,
+      output: {
+        server,
+        migrate: await this.#shouldRunMigration(config, server),
+        seed: await this.#shouldRunSeed(config, server),
+      },
+    };
+  }
+
+  #shouldRunMigration(
+    config: PostgreSqlDatabasePluginConfig,
+    server: PostgreSqlDatabaseServer,
+  ): MigrationOutput | Promise<MigrationOutput> {
+    if (!config.migrate) {
+      return { results: [] };
+    }
+    switch (config.migrate.strategy) {
+      case MigrationStrategy.SQL: {
+        const strategy = new MigrationSqlStrategy(server.connection);
+        return strategy.run();
+      }
+      default: {
+        return assertNever(
+          config.migrate.strategy,
+          `Unknown migration strategy: ${config.migrate.strategy}`,
+        );
+      }
+    }
+  }
+
+  #shouldRunSeed(
+    config: PostgreSqlDatabasePluginConfig,
+    server: PostgreSqlDatabaseServer,
+  ): SeedStrategyOutput | Promise<SeedStrategyOutput> {
+    if (!config.seed) {
+      return { results: [], warnings: [] };
+    }
+    const strategy = new SeedStrategy(config.seed, server.connection);
+    return strategy.run();
+  }
 }
 
 /**
  * PostgreSQL Database Plugin
  */
-export const postgreSqlDatabasePlugin: PostgreSqlDatabasePlugin = {
-  async setup(
-    config: PostgreSqlDatabasePluginConfig,
-  ): Promise<SetupTestsPluginInstance<PostgreSqlDatabaseServer>> {
-    if (config.server instanceof PostgreSqlDatabaseServer) {
-      const strategy = new PostgreSqlDatabaseConnectionStrategy(config.server);
-      return strategy.setup();
-    }
-
-    const suffix = Math.random().toString(36).substring(2);
-    const database = config.server.databaseName ||
-      `${config.server.databaseNamePrefix || "postgres"}-${suffix}`;
-    const serverName = `${
-      config.server.databaseServerNamePrefix || "postgres"
-    }-${suffix}`;
-    const port = config.server.port ?? 0;
-    const user = config.server.user ?? Math.random().toString(36).substring(2);
-    const password = config.server.password ??
-      Math.random().toString(36).substring(2);
-    const version = config.server.version || "latest";
-
-    let setup: SetupTestsPluginInstance<PostgreSqlDatabaseServer>;
-    switch (config.server.strategy) {
-      case "docker": {
-        const dockerConfig: PostgreSqlDatabaseDockerStrategyConfig = {
-          serverName,
-          port,
-          user,
-          password,
-          database,
-          version,
-        };
-        const strategy = new PostgreSqlDatabaseDockerStrategy(dockerConfig);
-        setup = await strategy.setup();
-        break;
-      }
-      default: {
-        return assertNever(
-          config.server.strategy,
-          `Unknown strategy: ${config.server.strategy}`,
-        );
-      }
-    }
-
-    // Run migrations
-    if (config.migrate) {
-      switch (config.migrate.strategy) {
-        case MigrationStrategy.SQL: {
-          const files: string[] = [];
-          for await (const file of expandGlob("**\/migrations\/**\/*.sql")) {
-            files.push(file.path);
-          }
-          const client = new Client({
-            ...setup.output.connection,
-            tls: { enabled: false },
-          });
-          await client.connect();
-          for (const file of files) {
-            const query = await Deno.readTextFile(file);
-            // TODO: add result to output
-            await client.queryObject(query);
-          }
-          await client.end();
-          break;
-        }
-        default: {
-          return assertNever(
-            config.migrate.strategy,
-            `Unknown strategy: ${config.migrate.strategy}`,
-          );
-        }
-      }
-    }
-
-    // Run seed
-    if (config.seed) {
-      const client = new Client({
-        ...setup.output.connection,
-        tls: { enabled: false },
-      });
-      await client.connect();
-      for (const [table, rows] of Object.entries(config.seed)) {
-        const columns = Object.keys(rows[0]);
-        const queryValues: string[] = [];
-        const values: unknown[] = [];
-        let count = 1;
-        for (const row of rows) {
-          const queryValue: number[] = [];
-          for (const _ of Object.values(row)) {
-            queryValue.push(count);
-            count += 1;
-          }
-          queryValues.push(`(${queryValue.map(value => `$${value}`).join(',')})`);
-          values.push(...Object.values(row));
-        }
-        const query = `INSERT INTO "${table}" (${columns}) VALUES ${queryValues.join(', ')};`;
-        // TODO: add result to output
-        await client.queryObject(query, values);
-      }
-      await client.end();
-    }
-
-    return setup;
-  },
-};
+export const postgreSqlDatabasePlugin = new PostgreSqlDatabasePluginFactory()
+  .create();

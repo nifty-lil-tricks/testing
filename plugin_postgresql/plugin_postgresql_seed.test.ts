@@ -1,15 +1,8 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
 import { Client } from "x/postgres/mod.ts";
-import { assertEquals, assertRejects } from "std/testing/asserts.ts";
-import {
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  it,
-} from "std/testing/bdd.ts";
-import { assertSpyCalls } from "std/testing/mock.ts";
+import { assertEquals } from "std/testing/asserts.ts";
+import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
@@ -19,7 +12,6 @@ import {
   postgreSqlDatabasePlugin,
   type PostgreSqlDatabaseServerStrategy,
 } from "./plugin_postgresql.ts";
-import { DenoCommand } from "./plugin_postgresql.utils.ts";
 
 const ignore = Deno.env.get("IGNORE_DOCKER_TESTS") === "true";
 
@@ -72,8 +64,26 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
         teardownTests = result.teardownTests;
 
         // Assert
-        const { connection } = result.outputs.database.output;
-        const client = new Client({ ...connection, tls: { enabled: false } });
+        const { server: { connection }, seed } = result.outputs.database.output;
+        const client = new Client({ tls: { enabled: false }, ...connection });
+        assertEquals(seed, {
+          results: [
+            {
+              query:
+                'INSERT INTO "User" (email,name) VALUES ($1,$2), ($3,$4), ($5,$6);',
+              args: [
+                "email 1",
+                "name 1",
+                "email 2",
+                "name 2",
+                "email 3",
+                "name 3",
+              ],
+              insertedCount: 3,
+            },
+          ],
+          warnings: [],
+        });
         try {
           await client.connect();
           const results = await client.queryObject(query);

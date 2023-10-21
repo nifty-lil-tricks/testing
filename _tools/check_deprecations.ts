@@ -16,6 +16,7 @@ const EXCLUDED_PATHS = [
   "npm",
   "examples/nifty-lil-tricks-testing-nodejs",
   "scripts",
+  "sandbox",
 ];
 
 const ROOT = new URL("../", import.meta.url);

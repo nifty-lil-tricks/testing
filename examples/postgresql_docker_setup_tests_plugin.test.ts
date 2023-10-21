@@ -34,7 +34,7 @@ describe("Service", () => {
       },
     });
     teardownTests = result.teardownTests;
-    server = result.outputs.database.output;
+    server = result.outputs.database.output.server;
   });
 
   afterEach(async () => {

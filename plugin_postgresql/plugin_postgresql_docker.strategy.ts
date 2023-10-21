@@ -84,7 +84,6 @@ export class PostgreSqlDatabaseDockerStrategy
         `PostgreSQL Docker server is not exposed on a valid hostname: ${hostname}`,
       );
     }
-    await this.#isDbHealthy(containerId);
     return {
       teardown: this.#teardown.bind(this, containerId),
       output: new PostgreSqlDatabaseServer(containerId, {
@@ -110,20 +109,6 @@ export class PostgreSqlDatabaseDockerStrategy
       ).output();
     } catch (error) {
       console.warn("Error tearing down PostgreSQL database server", error);
-    }
-  }
-
-  async #isDbHealthy(containerId: string): Promise<void> {
-    let shouldReturn = false;
-    while (shouldReturn === false) {
-      const c = new DenoCommand("docker", {
-        args: ["exec", containerId, "pg_isready"],
-      });
-      const output = await c.output();
-      if (output.success && output.code === 0) {
-        shouldReturn = true;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 300));
     }
   }
 }

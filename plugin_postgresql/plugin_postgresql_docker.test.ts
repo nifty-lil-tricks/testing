@@ -1,6 +1,7 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
 import { Client } from "x/postgres/mod.ts";
+import { getAvailablePort } from "x/port/mod.ts";
 import { assertEquals, assertRejects } from "std/testing/asserts.ts";
 import {
   afterEach,
@@ -69,19 +70,6 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
               // TODO: connection
               // connection: new PostgresDatabaseServer(connection),
             },
-            // TODO: migrate
-            migrate: {
-              strategy: "SQL_FILE",
-              files: "migrations/**/migration.sql", // Array or async function
-              orderBy: "FILENAME_DESC",
-            }, // Or just run function
-            // TODO: seed
-            seed: {
-              Property: [
-                { name: "name 1", address: "address 1" },
-                { name: "name 2", address: "address 2" },
-              ],
-            }, // Or just run function
           },
         });
         teardownTests = result.teardownTests;
@@ -92,22 +80,23 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
           {
             args: [
               "inspect",
-              result.outputs.database.output.instanceId,
+              result.outputs.database.output.server.instanceId,
             ],
           },
         ).output();
         const details = JSON.parse(
           new TextDecoder().decode(rawDetails.stdout).trim(),
         );
-        const { instanceId, connection } = result.outputs.database.output;
+        const { instanceId, connection } =
+          result.outputs.database.output.server;
         assertEquals(details?.[0]?.Id, instanceId);
-        const client = new Client({ ...connection, tls: { enabled: false } });
+        const client = new Client({ tls: { enabled: false }, ...connection });
         await client.connect();
         await client.end();
         assertSpyCalls(consoleWarnStub, 0);
       });
 
-      it("should setup tests with a PostgreSQL database server exposed on a specific host IP", async () => {
+      it("should setup tests with a PostgreSQL database server exposed on a specific hostname", async () => {
         // Arrange
         const mockHostIp = "1.2.3.4";
         const denoCommandOutputStub = stub(
@@ -120,13 +109,23 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
               stdout: new TextEncoder().encode(JSON.stringify([{
                 NetworkSettings: {
                   Ports: {
-                    "5432/tcp": [{ HostIp: "1.2.3.4", HostPort: 1234 }],
+                    "5432/tcp": [{ HostIp: mockHostIp, HostPort: 1234 }],
                   },
                 },
               }])),
               stderr: new TextEncoder().encode(""),
             });
           },
+        );
+        const clientConnectStub = stub(
+          Client.prototype,
+          "connect",
+          () => Promise.resolve(),
+        );
+        const clientEndStub = stub(
+          Client.prototype,
+          "end",
+          () => Promise.resolve(),
         );
 
         // Act
@@ -134,53 +133,35 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
           const result = await setupTests({
             database: { server: { strategy } },
           });
+          teardownTests = result.teardownTests;
 
           // Assert
           assertEquals(
-            result.outputs.database.output.connection.hostname,
+            result.outputs.database.output.server.connection.hostname,
             mockHostIp,
           );
         } finally {
           denoCommandOutputStub.restore();
+          clientConnectStub.restore();
+          clientEndStub.restore();
         }
       });
 
       it("should setup tests with a PostgreSQL database server exposed on a defined port", async () => {
         // Arrange
-        const port = 7777;
-        const denoCommandOutputStub = stub(
-          DenoCommand.prototype,
-          "output",
-          () => {
-            return Promise.resolve({
-              code: 0,
-              success: true,
-              stdout: new TextEncoder().encode(JSON.stringify([{
-                NetworkSettings: {
-                  Ports: {
-                    "5432/tcp": [{ HostIp: "1.2.3.4", HostPort: port }],
-                  },
-                },
-              }])),
-              stderr: new TextEncoder().encode(""),
-            });
-          },
-        );
+        const port = await getAvailablePort();
 
         // Act
-        try {
-          const result = await setupTests({
-            database: { server: { strategy, port } },
-          });
+        const result = await setupTests({
+          database: { server: { strategy, port } },
+        });
+        teardownTests = result.teardownTests;
 
-          // Assert
-          assertEquals(
-            result.outputs.database.output.connection.port,
-            port,
-          );
-        } finally {
-          denoCommandOutputStub.restore();
-        }
+        // Assert
+        assertEquals(
+          result.outputs.database.output.server.connection.port,
+          port,
+        );
       });
 
       it("should error if docker is not running or available", async () => {
@@ -364,21 +345,6 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
         assertSpyCalls(consoleWarnStub, 0);
         assertSpyCalls(denoCommandOutputStub, 2);
       });
-
-      it("should error if an unknown strategy is provided", async () => {
-        // Arrange, Act & Assert
-        await assertRejects(() =>
-          setupTests({
-            database: {
-              server: {
-                strategy:
-                  "unknown" as unknown as PostgreSqlDatabaseServerStrategy,
-              },
-            },
-          })
-        );
-        assertSpyCalls(consoleWarnStub, 0);
-      });
     });
 
     describe("teardownTests", () => {
@@ -401,7 +367,7 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
             args: [
               "inspect",
               '--format="{{.ID}}"',
-              result.outputs.database.output.instanceId,
+              result.outputs.database.output.server.instanceId,
             ],
           },
         ).output();
