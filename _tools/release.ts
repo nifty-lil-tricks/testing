@@ -37,8 +37,9 @@ const tagName = versionFile.version.toString();
 //   console.log(`Tag ${tagName} already exists.`);
 // } else {
 console.log(`Tagging ${tagName}...`);
-await repo.gitTag(tagName);
-await repo.gitPush("origin", tagName);
+// TODO
+// await repo.gitTag(tagName);
+// await repo.gitPush("origin", tagName);
 
 await publishNpm();
 
