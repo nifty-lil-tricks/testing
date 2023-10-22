@@ -2,7 +2,9 @@
 
 import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
 import {
+  afterAll,
   afterEach,
+  beforeAll,
   beforeEach,
   describe,
   it,
@@ -25,14 +27,27 @@ const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
 // Then one can use this in any test file as follows:
 describe("Service", () => {
   let teardownTests: SetupTestsTeardown;
+  let teardownServer: SetupTestsTeardown;
   let server: Server;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     // Setup tests with configured plugins
     const result = await setupTests({
       database: {
         // Setup server using the Docker strategy
         server: { strategy: ServerStrategy.DOCKER },
+      },
+    });
+    teardownServer = result.teardownTests;
+    server = result.outputs.database.output.server;
+  });
+
+  beforeEach(async () => {
+    // Setup tests with configured plugins
+    const result = await setupTests({
+      database: {
+        // Setup existing server using the Docker strategy
+        server,
         // Run migrations using the SQL strategy
         migrate: {
           strategy: MigrationStrategy.SQL,
@@ -47,12 +62,16 @@ describe("Service", () => {
       },
     });
     teardownTests = result.teardownTests;
-    server = result.outputs.database.output.server;
   });
 
   afterEach(async () => {
     // Teardown tests to restore environment after tests have run
     await teardownTests();
+  });
+
+  afterAll(async () => {
+    // Teardown server to restore environment after tests have run
+    await teardownServer();
   });
 
   describe("method", () => {

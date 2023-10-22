@@ -1,7 +1,7 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { createGraph, Module } from "x/deno_graph/mod.ts";
 import { walk } from "std/fs/walk.ts";
+import { createGraph, Module } from "x/deno_graph/mod.ts";
 
 const ROOT = new URL("../", import.meta.url);
 const EXTS = [".mjs", ".ts"];

@@ -1,11 +1,11 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { VERSION } from "../version.ts";
-import * as semver from "std/semver/mod.ts";
 import * as colors from "std/fmt/colors.ts";
-import { doc } from "x/deno_doc/mod.ts";
 import { walk } from "std/fs/walk.ts";
 import { join, toFileUrl } from "std/path/mod.ts";
+import * as semver from "std/semver/mod.ts";
+import { doc } from "x/deno_doc/mod.ts";
+import { VERSION } from "../version.ts";
 
 const EXTENSIONS = [".mjs", ".js", ".ts"];
 const EXCLUDED_PATHS = [
