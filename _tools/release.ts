@@ -63,8 +63,7 @@ async function publishNpm(): Promise<void> {
     const output = await command.output();
     if (!output.success) {
       console.log(`Failed to publish ${pkg.name} to npm.`);
-      console.log("Stdout:", output.stdout);
-      console.log("Stderr:", output.stderr);
+      console.log("Stderr:", new TextDecoder().decode(output.stderr));
       Deno.exit(1);
     }
   }
