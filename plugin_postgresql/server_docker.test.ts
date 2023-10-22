@@ -61,11 +61,8 @@ describe("postgreSqlPlugin", { ignore }, () => {
         // Arrange & Act
         const result = await setupTests({
           database: {
-            // TODO: could just chuck in a server instance here
             server: {
               strategy,
-              // TODO: connection
-              // connection: new PostgresDatabaseServer(connection),
             },
           },
         });
