@@ -28,28 +28,30 @@ const versionFile = new VersionFile();
 // const releasesMd = getReleasesMdFile();
 
 await repo.gitFetchTags("origin");
-const repoTags = await repo.getGitTags();
+// TODO
+// const repoTags = await repo.getGitTags();
 const tagName = versionFile.version.toString();
 
-if (repoTags.has(tagName)) {
-  console.log(`Tag ${tagName} already exists.`);
-} else {
-  console.log(`Tagging ${tagName}...`);
-  await repo.gitTag(tagName);
-  await repo.gitPush("origin", tagName);
+// TODO
+// if (repoTags.has(tagName)) {
+//   console.log(`Tag ${tagName} already exists.`);
+// } else {
+console.log(`Tagging ${tagName}...`);
+await repo.gitTag(tagName);
+await repo.gitPush("origin", tagName);
 
-  await publishNpm();
+await publishNpm();
 
-  console.log(`Creating GitHub release...`);
-  // TODO
-  // await createOctoKit().request(`POST /repos/{owner}/{repo}/releases`, {
-  //   ...getGitHubRepository(),
-  //   tag_name: tagName,
-  //   name: tagName,
-  //   body: releasesMd.getLatestReleaseText().fullText,
-  //   draft: true,
-  // });
-}
+console.log(`Creating GitHub release...`);
+// TODO
+// await createOctoKit().request(`POST /repos/{owner}/{repo}/releases`, {
+//   ...getGitHubRepository(),
+//   tag_name: tagName,
+//   name: tagName,
+//   body: releasesMd.getLatestReleaseText().fullText,
+//   draft: true,
+// });
+// }
 
 async function publishNpm(): Promise<void> {
   for (const pkg of packages) {
