@@ -44,4 +44,4 @@ jobs:
         run: |
           git config user.email "${{ github.actor }}@users.noreply.github.com"
           git config user.name "${{ github.actor }}"
-          ./_tools/release/release_create_pr.ts
+          ./_tools/release_create_pr.ts
