@@ -44,7 +44,7 @@
     "lint:check-assertions": "deno run --allow-read --allow-net ./_tools/check_assertions.ts",
     "lint": "deno lint && deno fmt --check && deno task fmt:licence-headers --check && deno task lint:deprecations && deno task lint:doc-imports && deno task lint:check-assertions",
     "pre-commit": "deno task lint && deno task check && deno task test:all",
-    "build": "deno run -A scripts/build_npm.ts",
+    "build": "deno run -A _tools/build_npm.ts",
     "cov": "deno task clean && deno task test && deno coverage ./cov --lcov --output=cov.lcov",
     "cov:check": "deno task cov && lcov --summary cov.lcov --fail-under-lines 100",
     "report": "deno task cov && genhtml -o html_cov cov.lcov && open html_cov/index.html"

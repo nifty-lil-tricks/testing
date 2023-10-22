@@ -2,6 +2,7 @@
 
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
+import { packages } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/_tools/release_packages.ts";
 import { containsVersion, createOctoKit, getGitHubRepository } from "./deps.ts";
 import { getReleasesMdFile, loadRepo, VersionFile } from "./release_repo.ts";
 
@@ -35,7 +36,9 @@ if (repoTags.has(tagName)) {
   await repo.gitTag(tagName);
   await repo.gitPush("origin", tagName);
 
-  console.log(`Creating release...`);
+  await publishNpm();
+
+  console.log(`Creating GitHub release...`);
   await createOctoKit().request(`POST /repos/{owner}/{repo}/releases`, {
     ...getGitHubRepository(),
     tag_name: tagName,
@@ -43,4 +46,22 @@ if (repoTags.has(tagName)) {
     body: releasesMd.getLatestReleaseText().fullText,
     draft: true,
   });
+}
+
+async function publishNpm(): Promise<void> {
+  for (const pkg of packages) {
+    console.log(`Publishing ${pkg.name} to npm...`);
+    const command = new Deno.Command("npm", {
+      // TODO: remove dry run
+      args: ["publish", "--dry-run"],
+      cwd: pkg.dir,
+    });
+    const output = await command.output();
+    if (!output.success) {
+      console.log(`Failed to publish ${pkg.name} to npm.`);
+      console.log("Stdout:", output.stdout);
+      console.log("Stderr:", output.stderr);
+      Deno.exit(1);
+    }
+  }
 }
