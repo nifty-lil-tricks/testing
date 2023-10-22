@@ -1,3 +1,5 @@
+### 0.2.1 / 2023.10.22
+
 ### 0.2.0 / 2023.10.22
 
 - Activate release for future jobs
