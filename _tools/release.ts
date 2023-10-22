@@ -2,6 +2,7 @@
 
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
+// TODO
 // import { containsVersion, createOctoKit, getGitHubRepository } from "./deps.ts";
 import { packages } from "./release_packages.ts";
 import { loadRepo, VersionFile } from "./release_repo.ts";
@@ -61,7 +62,7 @@ async function publishNpm(): Promise<void> {
       // TODO
       args: ["publish", "--access", "public", "--dry-run"],
       // args: ["publish", "--access", "public"],
-      cwd: pkg.dir,
+      cwd: pkg.outDir,
     });
     const output = await command.output();
     if (!output.success) {

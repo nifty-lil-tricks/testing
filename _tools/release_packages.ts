@@ -12,12 +12,13 @@ export interface Package {
   name: string;
   description: string;
   dir: string;
+  outDir: string;
   tags: string[];
   test?: boolean;
   mappings?: SpecifierMappings;
 }
 
-export const packages: Package[] = [
+const partialPackages: Omit<Package, "outDir">[] = [
   {
     name: "@nifty-lil-tricks/testing",
     description:
@@ -40,3 +41,8 @@ export const packages: Package[] = [
     } as SpecifierMappings,
   },
 ];
+
+export const packages: Package[] = partialPackages.map((pkg) => ({
+  ...pkg,
+  outDir: join(rootDir, "./npm", pkg.name),
+}));
