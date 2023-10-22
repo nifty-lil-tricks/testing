@@ -1,26 +1,24 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { Client } from "x/postgres/mod.ts";
-import { assertEquals } from "std/testing/asserts.ts";
-import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
-import {
-  MigrationStrategy,
-  postgreSqlDatabasePlugin,
-  type PostgreSqlDatabaseServerStrategy,
-} from "./plugin.ts";
+import { assertEquals } from "std/testing/asserts.ts";
+import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
+import { Client } from "x/postgres/mod.ts";
+import { MigrationStrategy } from "./migration.ts";
+import { postgreSqlPlugin } from "./plugin.ts";
+import { ServerStrategy } from "./server.ts";
 
 const ignore = Deno.env.get("IGNORE_DOCKER_TESTS") === "true";
 
 // Then one can use this in any test file as follows:
-describe("postgreSqlDatabasePlugin", { ignore }, () => {
+describe("postgreSqlPlugin", { ignore }, () => {
   let teardownTests: SetupTestsTeardown;
-  const strategy: PostgreSqlDatabaseServerStrategy = "docker";
+  const strategy: ServerStrategy = ServerStrategy.DOCKER;
   const { setupTests } = setupTestsFactory({
-    database: postgreSqlDatabasePlugin,
+    database: postgreSqlPlugin,
   });
 
   beforeEach(() => {

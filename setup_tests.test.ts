@@ -1,9 +1,9 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { beforeEach, describe, it } from "std/testing/bdd.ts";
 import { assertEquals, assertInstanceOf } from "std/testing/asserts.ts";
+import { beforeEach, describe, it } from "std/testing/bdd.ts";
 import { setupTestsFactory } from "./setup_tests.ts";
-import type { SetupTestsFn, SetupTestsPlugin } from "./setup_tests.type.ts";
+import { Plugin, SetupTestsFn } from "./type.ts";
 
 describe("setupTestsFactory", () => {
   let setupTests: SetupTestsFn<Plugins>;
@@ -97,8 +97,8 @@ describe("setupTestsFactory", () => {
 });
 
 type Plugins = {
-  plugin1: SetupTestsPlugin<Plugin1Config, Plugin1Result>;
-  plugin2: SetupTestsPlugin<Plugin2Config, Plugin2Result>;
+  plugin1: Plugin<Plugin1Config, Plugin1Result>;
+  plugin2: Plugin<Plugin2Config, Plugin2Result>;
 };
 
 interface Plugin1Config {
@@ -123,7 +123,7 @@ function teardown1() {
   teardownCalls.push("plugin1.teardown");
 }
 
-const plugin1: SetupTestsPlugin<Plugin1Config, Plugin1Result> = {
+const plugin1: Plugin<Plugin1Config, Plugin1Result> = {
   setup(config: Plugin1Config) {
     return {
       output: { plugin1Result: config },
@@ -136,7 +136,7 @@ function teardown2() {
   teardownCalls.push("plugin2.teardown");
 }
 
-const plugin2: SetupTestsPlugin<Plugin2Config, Plugin2Result> = {
+const plugin2: Plugin<Plugin2Config, Plugin2Result> = {
   setup(config: Plugin2Config) {
     return {
       output: { plugin2Result: config },

@@ -1,11 +1,11 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { build, type BuildOptions, emptyDir } from "x/dnt/mod.ts";
-import { dirname, fromFileUrl, join } from "std/path/mod.ts";
 import { parse } from "std/flags/mod.ts";
+import { dirname, fromFileUrl, join } from "std/path/mod.ts";
 import { parse as parseSemver } from "std/semver/mod.ts";
+import { build, BuildOptions, emptyDir } from "x/dnt/mod.ts";
+import { SpecifierMappings } from "x/dnt/transform.ts";
 import { VERSION } from "../version.ts";
-import type { SpecifierMappings } from "x/dnt/transform.ts";
 
 const { _: [pkgToBuild] } = parse(Deno.args);
 

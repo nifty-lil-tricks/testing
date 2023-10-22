@@ -1,29 +1,25 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { Client } from "x/postgres/mod.ts";
-import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
+import { assertRejects } from "https://deno.land/std@0.160.0/testing/asserts.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
-import {
-  MigrationStrategy,
-  postgreSqlDatabasePlugin,
-  type PostgreSqlDatabaseServerStrategy,
-} from "./plugin.ts";
-import { assertRejects } from "https://deno.land/std@0.160.0/testing/asserts.ts";
-import { MigrationSqlError } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/migration_sql.strategy.ts";
+import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
 import { stub } from "std/testing/mock.ts";
+import { Client } from "x/postgres/mod.ts";
+import { MigrationStrategy } from "./migration.ts";
+import { SqlMigrationError } from "./migration_sql.ts";
+import { postgreSqlPlugin } from "./plugin.ts";
+import { ServerStrategy } from "./server.ts";
 
 const ignore = Deno.env.get("IGNORE_DOCKER_TESTS") === "true";
 
 // Then one can use this in any test file as follows:
-describe("postgreSqlDatabasePlugin", { ignore }, () => {
+describe("postgreSqlPlugin", { ignore }, () => {
   let teardownTests: SetupTestsTeardown;
-  const strategy: PostgreSqlDatabaseServerStrategy = "docker";
-  const { setupTests } = setupTestsFactory({
-    database: postgreSqlDatabasePlugin,
-  });
+  const strategy: ServerStrategy = ServerStrategy.DOCKER;
+  const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
 
   beforeEach(() => {
     teardownTests = (() => {
@@ -47,7 +43,6 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
           const result = await setupTests({
             database: {
               server: { strategy },
-              // TODO: migrate
               migrate: {
                 strategy: MigrationStrategy.SQL,
                 // TODO: add support for customising migrations
@@ -93,7 +88,7 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
                     },
                   },
                 }),
-              MigrationSqlError,
+              SqlMigrationError,
               `Unable to run migrations: ${mockError.message}`,
             );
           } finally {

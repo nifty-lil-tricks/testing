@@ -1,27 +1,31 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
 import { Client } from "x/postgres/client.ts";
-import {
-  PostgreSqlDatabaseServerPluginConnection,
-  SeedConfig,
-  SeedStrategyContract,
-  SeedStrategyOutput,
-  SeedStrategyResult,
-} from "./plugin.ts";
+import type { Connection } from "./server.ts";
+
+/**
+ * PostgreSQL Plugin Seed Strategy Contract.
+ */
+export interface SeedStrategyContract {
+  /**
+   * Run the Seed strategy.
+   */
+  run(): Promise<SeedOutput>;
+}
 
 export class SeedStrategy implements SeedStrategyContract {
   #config: SeedConfig;
-  #connection: PostgreSqlDatabaseServerPluginConnection;
+  #connection: Connection;
 
   constructor(
     config: SeedConfig,
-    connection: PostgreSqlDatabaseServerPluginConnection,
+    connection: Connection,
   ) {
     this.#config = config;
     this.#connection = connection;
   }
 
-  public async run(): Promise<SeedStrategyOutput> {
+  public async run(): Promise<SeedOutput> {
     const client = new Client({
       tls: { enabled: false },
       ...this.#connection,
@@ -29,7 +33,7 @@ export class SeedStrategy implements SeedStrategyContract {
     await client.connect();
     try {
       const warnings: unknown[] = [];
-      const results: SeedStrategyResult[] = [];
+      const results: SeedResult[] = [];
       for (const [table, rows] of Object.entries(this.#config)) {
         const columns = Object.keys(rows[0]);
         const rowValueRefs: string[] = [];
@@ -64,4 +68,41 @@ export class SeedStrategy implements SeedStrategyContract {
       await client.end();
     }
   }
+}
+
+/**
+ * PostgreSQL Plugin Database Seed Config.
+ */
+export type SeedConfig = Record<string, Record<string, unknown>[]>;
+
+/**
+ * PostgreSQL Plugin Seed result.
+ */
+export interface SeedResult {
+  /**
+   * The PostgreSQL query that was executed.
+   */
+  readonly query: string;
+  /**
+   * The arguments that were passed to the query.
+   */
+  readonly args: string[];
+  /**
+   * The number of rows that were inserted by the query. If not defined, no rows were inserted.
+   */
+  readonly insertedCount?: number;
+}
+
+/**
+ * PostgreSQL Plugin Seed output.
+ */
+export interface SeedOutput {
+  /**
+   * The Seed results.
+   */
+  readonly results: SeedResult[];
+  /**
+   * The Seed warnings. If no warning, the array will be empty.
+   */
+  readonly warnings: unknown[];
 }

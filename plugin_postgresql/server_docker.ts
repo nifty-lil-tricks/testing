@@ -1,33 +1,23 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import {
-  type SetupTestsPluginInstance,
+import type {
+  PluginInstance,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import {
-  PostgreSqlDatabaseServer,
-  type PostgreSqlDatabaseServerPluginConnection,
-  type PostgreSqlDatabaseStrategyContract,
-} from "./plugin.ts";
-import { DenoCommand } from "./plugin_postgresql.utils.ts";
+  type Connection,
+  Server,
+  type ServerStrategyContract,
+} from "./server.ts";
+import { DenoCommand } from "./utils.ts";
 
-export interface PostgreSqlDatabaseDockerStrategyConfig
-  extends Omit<PostgreSqlDatabaseServerPluginConnection, "hostname"> {
-  version: string;
-}
-
-export class PostgreSqlDatabaseDockerServerError extends Error {
-  override name = "PostgreSqlDatabaseDockerServerError";
-}
-
-export class PostgreSqlDatabaseDockerStrategy
-  implements PostgreSqlDatabaseStrategyContract {
-  #config: PostgreSqlDatabaseDockerStrategyConfig;
-  constructor(config: PostgreSqlDatabaseDockerStrategyConfig) {
+export class DockerServerStrategy implements ServerStrategyContract {
+  #config: DockerServerStrategyConfig;
+  constructor(config: DockerServerStrategyConfig) {
     this.#config = config;
   }
 
   async setup(): Promise<
-    SetupTestsPluginInstance<PostgreSqlDatabaseServer>
+    PluginInstance<Server>
   > {
     const dbServerStartCommandArgs = [
       "run",
@@ -52,7 +42,7 @@ export class PostgreSqlDatabaseDockerStrategy
     const runDbServerExitCode = raw.code;
     if (runDbServerExitCode !== 0) {
       const stderr = new TextDecoder().decode(raw.stderr);
-      throw new PostgreSqlDatabaseDockerServerError(
+      throw new DockerServerError(
         `Error starting PostgreSQL database server (exit code: ${runDbServerExitCode}): ${stderr}`,
       );
     }
@@ -64,7 +54,7 @@ export class PostgreSqlDatabaseDockerStrategy
     const inspectDbServerExitCode = rawDetails.code;
     if (inspectDbServerExitCode !== 0) {
       const stderr = new TextDecoder().decode(rawDetails.stderr);
-      throw new PostgreSqlDatabaseDockerServerError(
+      throw new DockerServerError(
         `Error inspecting PostgreSQL database server (exit code: ${inspectDbServerExitCode}): ${stderr}`,
       );
     }
@@ -75,18 +65,18 @@ export class PostgreSqlDatabaseDockerStrategy
     const port = Number(exposedHostPort);
     const hostname = exposedHostIp === "0.0.0.0" ? "localhost" : exposedHostIp;
     if (Number.isNaN(port)) {
-      throw new PostgreSqlDatabaseDockerServerError(
+      throw new DockerServerError(
         `PostgreSQL Docker server is not exposed on a valid port: ${exposedHostPort}`,
       );
     }
     if (!hostname) {
-      throw new PostgreSqlDatabaseDockerServerError(
+      throw new DockerServerError(
         `PostgreSQL Docker server is not exposed on a valid hostname: ${hostname}`,
       );
     }
     return {
       teardown: this.#teardown.bind(this, containerId),
-      output: new PostgreSqlDatabaseServer(containerId, {
+      output: new Server(containerId, {
         serverName: this.#config.serverName,
         hostname,
         port,
@@ -111,4 +101,25 @@ export class PostgreSqlDatabaseDockerStrategy
       console.warn("Error tearing down PostgreSQL database server", error);
     }
   }
+}
+
+/**
+ * Configuration for the Docker server strategy.
+ */
+export interface DockerServerStrategyConfig
+  extends Omit<Connection, "hostname"> {
+  /**
+   * The version of PostgreSQL to use.
+   */
+  version: string;
+}
+
+/**
+ * Error thrown when the Docker server strategy encounters an error.
+ */
+export class DockerServerError extends Error {
+  /**
+   * The name of the error.
+   */
+  override name = "DockerServerError";
 }

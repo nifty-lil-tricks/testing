@@ -1,31 +1,29 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { assertEquals } from "std/testing/asserts.ts";
-import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
-import {
-  postgreSqlDatabasePlugin,
-  PostgreSqlDatabaseServer,
-} from "./plugin.ts";
-import { Stub, stub } from "std/testing/mock.ts";
+import { assertEquals } from "std/testing/asserts.ts";
+import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
+import { type Stub, stub } from "std/testing/mock.ts";
+import { postgreSqlPlugin } from "./plugin.ts";
+import { Server } from "./server.ts";
 
 // Then one can use this in any test file as follows:
-describe("postgreSqlDatabasePlugin", () => {
+describe("postgreSqlPlugin", () => {
   let teardownTests: SetupTestsTeardown;
   const { setupTests } = setupTestsFactory({
-    database: postgreSqlDatabasePlugin,
+    database: postgreSqlPlugin,
   });
-  let server: PostgreSqlDatabaseServer;
-  let serverInitStub: Stub<PostgreSqlDatabaseServer>;
+  let server: Server;
+  let serverInitStub: Stub<Server>;
 
   beforeEach(() => {
     teardownTests = (() => {
       // No-op in-case this is not set
     }) as SetupTestsTeardown;
-    server = new PostgreSqlDatabaseServer("instanceId", {
+    server = new Server("instanceId", {
       serverName: "serverName",
       hostname: "hostname",
       port: 1234,

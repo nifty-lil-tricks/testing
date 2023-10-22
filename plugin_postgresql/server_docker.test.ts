@@ -1,7 +1,10 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { Client } from "x/postgres/mod.ts";
-import { getAvailablePort } from "x/port/mod.ts";
+import {
+  setupTestsFactory,
+  type SetupTestsFn,
+  type SetupTestsTeardown,
+} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import { assertEquals, assertRejects } from "std/testing/asserts.ts";
 import {
   afterEach,
@@ -16,31 +19,25 @@ import {
   type Stub,
   stub,
 } from "std/testing/mock.ts";
-import {
-  setupTestsFactory,
-  type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
-import {
-  type PostgreSqlDatabasePlugin,
-  postgreSqlDatabasePlugin,
-  type PostgreSqlDatabaseServerStrategy,
-} from "./plugin.ts";
-import { DenoCommand } from "./plugin_postgresql.utils.ts";
-import { type SetupTestsFn } from "../setup_tests.type.ts";
-import { PostgreSqlDatabaseDockerServerError } from "./plugin_postgresql_docker.strategy.ts";
+import { getAvailablePort } from "x/port/mod.ts";
+import { Client } from "x/postgres/mod.ts";
+import { type PostgreSqlPlugin, postgreSqlPlugin } from "./plugin.ts";
+import { ServerStrategy } from "./server.ts";
+import { DockerServerError } from "./server_docker.ts";
+import { DenoCommand } from "./utils.ts";
 
 const ignore = Deno.env.get("IGNORE_DOCKER_TESTS") === "true";
 
 // Then one can use this in any test file as follows:
-describe("postgreSqlDatabasePlugin", { ignore }, () => {
+describe("postgreSqlPlugin", { ignore }, () => {
   let teardownTests: SetupTestsTeardown;
   let consoleWarnStub: Stub<Console>;
-  let setupTests: SetupTestsFn<{ database: PostgreSqlDatabasePlugin }>;
-  const strategy: PostgreSqlDatabaseServerStrategy = "docker";
+  let setupTests: SetupTestsFn<{ database: PostgreSqlPlugin }>;
+  const strategy: ServerStrategy = ServerStrategy.DOCKER;
 
   beforeAll(() => {
     const result = setupTestsFactory({
-      database: postgreSqlDatabasePlugin,
+      database: postgreSqlPlugin,
     });
     setupTests = result.setupTests;
   });
@@ -217,7 +214,7 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
                   server: { strategy },
                 },
               }),
-            PostgreSqlDatabaseDockerServerError,
+            DockerServerError,
             "PostgreSQL Docker server is not exposed on a valid port: undefined",
           );
         } finally {
@@ -252,7 +249,7 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
                   server: { strategy },
                 },
               }),
-            PostgreSqlDatabaseDockerServerError,
+            DockerServerError,
             `Error starting PostgreSQL database server (exit code: ${mockExitCode}): ${mockStderr}`,
           );
         } finally {
@@ -297,7 +294,7 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
                   server: { strategy },
                 },
               }),
-            PostgreSqlDatabaseDockerServerError,
+            DockerServerError,
             `Error inspecting PostgreSQL database server (exit code: ${mockExitCode}): ${mockStderr}`,
           );
         } finally {
@@ -336,7 +333,7 @@ describe("postgreSqlDatabasePlugin", { ignore }, () => {
                   server: { strategy },
                 },
               }),
-            PostgreSqlDatabaseDockerServerError,
+            DockerServerError,
             "PostgreSQL Docker server is not exposed on a valid hostname: undefined",
           );
         } finally {

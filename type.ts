@@ -1,6 +1,6 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-export interface SetupTestsPluginInstance<Result> {
+export interface PluginInstance<Result> {
   output: Result;
   teardown: () => MaybePromise<void>;
 }
@@ -9,15 +9,15 @@ export type MaybePromise<Type> = Type | Promise<Type>;
 
 export type SetupTestsPluginSetupFn<Config, Result> = (
   config: Config,
-) => MaybePromise<SetupTestsPluginInstance<Result>>;
+) => MaybePromise<PluginInstance<Result>>;
 
-export type SetupTestsPlugin<Config, Result> = {
+export type Plugin<Config, Result> = {
   setup: SetupTestsPluginSetupFn<Config, Result>;
 };
 
 // This is an acceptable use of any because it's only used in the type signature
 // deno-lint-ignore no-explicit-any
-export type SetupTestsPlugins = Record<string, SetupTestsPlugin<any, any>>;
+export type SetupTestsPlugins = Record<string, Plugin<any, any>>;
 
 // Remove when the base config actually contains values
 // deno-lint-ignore no-empty-interface
@@ -63,3 +63,11 @@ export type SetupTestsFn<Plugins extends SetupTestsPlugins> = <
 >(
   config: Config,
 ) => Promise<SetupTestsResult<Plugins, Config>>;
+
+/**
+ * Marks a type as being one of the following:
+ *  - A value of type `V`
+ *  - A function that returns a value of type `V`
+ *  - A function that returns a promise of a value of type `V`
+ */
+export type FunctionOrValue<V> = V | (() => Promise<V>) | (() => V);

@@ -1,6 +1,6 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import type {
+import {
   SetupTestsConfig,
   SetupTestsFactoryPlugins,
   SetupTestsFactoryResult,
@@ -8,7 +8,7 @@ import type {
   SetupTestsPluginTeardown,
   SetupTestsResult,
   SetupTestsTeardown,
-} from "./setup_tests.type.ts";
+} from "./type.ts";
 
 /**
  * Set up tests with defined plugins.
@@ -143,6 +143,13 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
       teardownTests: this.#buildTeardown(teardowns.reverse()).bind(this),
     };
   }
+}
+
+/**
+ * Assert that the input is never and not unexpected.
+ */
+export function assertNever(_input: never, message: string): never {
+  throw new Error(message);
 }
 
 // TODO: add in when generic config is added

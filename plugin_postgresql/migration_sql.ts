@@ -1,19 +1,20 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { Client } from "x/postgres/client.ts";
-import {
-  MigrationOutput,
-  MigrationResult,
-  MigrationStrategyContract,
-  PostgreSqlDatabaseServerPluginConnection,
-} from "./plugin.ts";
 import { expandGlob } from "std/fs/expand_glob.ts";
 import { basename } from "std/path/mod.ts";
+import { Client } from "x/postgres/client.ts";
+import type {
+  MigrationOutput,
+  MigrationResult,
+  MigrationStrategy,
+  MigrationStrategyContract,
+} from "./migration.ts";
+import type { Connection } from "./server.ts";
 
-export class MigrationSqlStrategy implements MigrationStrategyContract {
-  #connection: PostgreSqlDatabaseServerPluginConnection;
+export class SqlMigrationStrategy implements MigrationStrategyContract {
+  #connection: Connection;
 
-  constructor(connection: PostgreSqlDatabaseServerPluginConnection) {
+  constructor(connection: Connection) {
     this.#connection = connection;
   }
 
@@ -22,7 +23,7 @@ export class MigrationSqlStrategy implements MigrationStrategyContract {
     try {
       return await this.#run(results);
     } catch (error) {
-      throw new MigrationSqlError(
+      throw new SqlMigrationError(
         `Unable to run migrations: ${(error as Error).message}`,
         results,
       );
@@ -59,13 +60,35 @@ export class MigrationSqlStrategy implements MigrationStrategyContract {
   }
 }
 
-export class MigrationSqlError extends Error {
-  public override readonly name = "MigrationSqlError";
+/**
+ * PostgreSQL Plugin Sql Migration error .
+ */
+export class SqlMigrationError extends Error {
+  /**
+   * The name of the error.
+   */
+  public override readonly name = "SqlMigrationError";
 
+  /**
+   * The details of the error.
+   */
   public readonly details: MigrationResult[];
 
   constructor(message: string, details: MigrationResult[]) {
     super(message);
     this.details = details;
   }
+}
+
+/**
+ * PostgreSQL Plugin Database SQL Migration Config
+ */
+export interface SqlMigrationConfig {
+  /**
+   * The SQL strategy. There are no other options for this config.
+   */
+  strategy: Extract<MigrationStrategy, "SQL">;
+  // TODO: add later support by mention as upcoming functionality in the README
+  // files?: FunctionOrValue<string | string[]>;
+  // orderBy?: MigrationOrderBy;
 }

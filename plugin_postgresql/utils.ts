@@ -41,7 +41,3 @@ export class DenoCommand {
     };
   }
 }
-
-export function assertNever(_input: never, message: string): never {
-  throw new Error(message);
-}

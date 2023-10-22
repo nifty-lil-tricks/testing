@@ -1,10 +1,10 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import t from "tap";
 import {
   setupTestsFactory,
-  type SetupTestsTeardown,
+  SetupTestsTeardown,
 } from "@nifty-lil-tricks/testing";
+import t from "tap";
 
 // Define or import a plugin as follows:
 const helloWorldPlugin = {

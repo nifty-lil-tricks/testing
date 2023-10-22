@@ -1,5 +1,10 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
+import {
+  setupTestsFactory,
+  type SetupTestsFn,
+  type SetupTestsTeardown,
+} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import { assertRejects } from "std/testing/asserts.ts";
 import {
   afterEach,
@@ -8,25 +13,17 @@ import {
   describe,
   it,
 } from "std/testing/bdd.ts";
-import {
-  setupTestsFactory,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
-import {
-  MigrationStrategy,
-  type PostgreSqlDatabasePlugin,
-  postgreSqlDatabasePlugin,
-  PostgreSqlDatabaseServer,
-  type PostgreSqlDatabaseServerStrategy,
-} from "./plugin.ts";
-import { type SetupTestsFn, SetupTestsTeardown } from "../setup_tests.type.ts";
+import { MigrationStrategy } from "./migration.ts";
+import { PostgreSqlPlugin, postgreSqlPlugin } from "./plugin.ts";
+import { Server, ServerStrategy } from "./server.ts";
 
-describe("postgreSqlDatabasePlugin", () => {
+describe("postgreSqlPlugin", () => {
   let teardownTests: SetupTestsTeardown;
-  let setupTests: SetupTestsFn<{ database: PostgreSqlDatabasePlugin }>;
+  let setupTests: SetupTestsFn<{ database: PostgreSqlPlugin }>;
 
   beforeAll(() => {
     const result = setupTestsFactory({
-      database: postgreSqlDatabasePlugin,
+      database: postgreSqlPlugin,
     });
     setupTests = result.setupTests;
   });
@@ -49,8 +46,7 @@ describe("postgreSqlDatabasePlugin", () => {
         setupTests({
           database: {
             server: {
-              strategy:
-                "unknown" as unknown as PostgreSqlDatabaseServerStrategy,
+              strategy: "unknown" as unknown as ServerStrategy,
             },
           },
         })
@@ -59,7 +55,7 @@ describe("postgreSqlDatabasePlugin", () => {
 
     it("should error if unknown migration strategy is provided", async () => {
       // Arrange
-      const server = new PostgreSqlDatabaseServer("instanceId", {
+      const server = new Server("instanceId", {
         serverName: "serverName",
         hostname: "hostname",
         port: 1234,

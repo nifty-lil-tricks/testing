@@ -121,7 +121,7 @@ An example of a plugin is as follows:
 
 ```typescript
 import {
-  type SetupTestsPlugin,
+  type Plugin,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 
 interface HelloWorldConfig {
@@ -130,7 +130,7 @@ interface HelloWorldConfig {
 
 type HelloWorldResult = string;
 
-const helloWorldPlugin: SetupTestsPlugin<HelloWorldConfig, HelloWorldResult> = {
+const helloWorldPlugin: Plugin<HelloWorldConfig, HelloWorldResult> = {
   setup(config: HelloWorldConfig) {
     // Setup plugin according to config
     return {
