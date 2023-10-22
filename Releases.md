@@ -1,3 +1,12 @@
+### 0.2.0 / 2023.10.22
+
+- Activate release for future jobs
+- Ensure publish is run from the current directories
+- Merge pull request #9 from jonnydgreen/release
+- Remove stdout and add decoding
+- Remove tag check for now
+- Remove tag push for now
+
 ### 0.1.0 / 2023.10.22
 
 - Add version bump to CI
