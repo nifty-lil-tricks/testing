@@ -1,3 +1,12 @@
+### 0.1.0 / 2023.10.22
+
+- Add version bump to CI
+- Correct script name
+- Merge pull request #5 from jonnydgreen/release
+- Merge pull request #6 from jonnydgreen/bugfix/move-app-id-to-secrets
+- Merge pull request #7 from jonnydgreen/bugfix/correct-script-name
+- Move App Id to secrets
+
 ### 0.0.1 / 2023.10.22
 
 - Add Postgresql and Prisma plugins
