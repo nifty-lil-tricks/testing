@@ -2,66 +2,57 @@
 
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-// TODO
-// import { containsVersion, createOctoKit, getGitHubRepository } from "./deps.ts";
+import { containsVersion, createOctoKit, getGitHubRepository } from "./deps.ts";
 import { packages } from "./release_packages.ts";
-import { loadRepo, VersionFile } from "./release_repo.ts";
+import { getReleasesMdFile, loadRepo, VersionFile } from "./release_repo.ts";
 
 const repo = await loadRepo();
 
-// TODO
-// // only run this for commits that contain a version number in the commit message
-// if (!containsVersion(await repo.gitCurrentCommitMessage())) {
-//   console.log("Exiting: No version found in commit name.");
-//   Deno.exit();
-// }
+// only run this for commits that contain a version number in the commit message
+if (!containsVersion(await repo.gitCurrentCommitMessage())) {
+  console.log("Exiting: No version found in commit name.");
+  Deno.exit();
+}
 
-// // ensure this is the main branch
-// if ((await repo.gitCurrentBranch()) !== "main") {
-//   console.log("Exiting: Not on main branch.");
-//   Deno.exit();
-// }
+// ensure this is the main branch
+if ((await repo.gitCurrentBranch()) !== "main") {
+  console.log("Exiting: Not on main branch.");
+  Deno.exit();
+}
 
 // now attempt to create a release by tagging
 // the repo and creating a draft release
 const versionFile = new VersionFile();
-// TODO
-// const releasesMd = getReleasesMdFile();
+const releasesMd = getReleasesMdFile();
 
 await repo.gitFetchTags("origin");
-// TODO
-// const repoTags = await repo.getGitTags();
+const repoTags = await repo.getGitTags();
 const tagName = versionFile.version.toString();
 
-// TODO
-// if (repoTags.has(tagName)) {
-//   console.log(`Tag ${tagName} already exists.`);
-// } else {
-console.log(`Tagging ${tagName}...`);
-// TODO
-// await repo.gitTag(tagName);
-// await repo.gitPush("origin", tagName);
+if (repoTags.has(tagName)) {
+  console.log(`Tag ${tagName} already exists.`);
+} else {
+  console.log(`Tagging ${tagName}...`);
+  await repo.gitTag(tagName);
+  await repo.gitPush("origin", tagName);
 
-await publishNpm();
+  await publishNpm();
 
-console.log(`Creating GitHub release...`);
-// TODO
-// await createOctoKit().request(`POST /repos/{owner}/{repo}/releases`, {
-//   ...getGitHubRepository(),
-//   tag_name: tagName,
-//   name: tagName,
-//   body: releasesMd.getLatestReleaseText().fullText,
-//   draft: true,
-// });
-// }
+  console.log(`Creating GitHub release...`);
+  await createOctoKit().request(`POST /repos/{owner}/{repo}/releases`, {
+    ...getGitHubRepository(),
+    tag_name: tagName,
+    name: tagName,
+    body: releasesMd.getLatestReleaseText().fullText,
+    draft: true,
+  });
+}
 
 async function publishNpm(): Promise<void> {
   for (const pkg of packages) {
     console.log(`Publishing ${pkg.name} to npm...`);
     const command = new Deno.Command("npm", {
-      // TODO
-      args: ["publish", "--access", "public", "--dry-run"],
-      // args: ["publish", "--access", "public"],
+      args: ["publish", "--access", "public"],
       cwd: pkg.outDir,
     });
     const output = await command.output();
