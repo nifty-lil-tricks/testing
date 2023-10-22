@@ -26,18 +26,22 @@ jobs:
       - name: Set up Deno
         uses: denoland/setup-deno@v1
 
-      # TODO: add later
-      # - name: Run version bump
-      #   run: |
-      #     git remote add upstream https://github.com/jonnydgreen/nifty-lil-tricks-testing
-      #     ./_tools/release/01_bump_version.ts --${{github.event.inputs.releaseKind}}
+      - name: Run version bump
+        run: |
+          git remote add upstream https://github.com/jonnydgreen/nifty-lil-tricks-testing
+          ./_tools/release_bump_version.ts --${{github.event.inputs.releaseKind}}
 
-      # TODO: add later
-      # - name: Create PR
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.JONNYDGREEN_BOT_PAT }}
-      #     GH_WORKFLOW_ACTOR: ${{ github.actor }}
-      #   run: |
-      #     git config user.email "${{ github.actor }}@users.noreply.github.com"
-      #     git config user.name "${{ github.actor }}"
-      #     ./_tools/release/02_create_pr.ts
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.JONNYDGREEN_BOT_APP_ID }}
+          private-key: ${{ secrets.JONNYDGREEN_BOT_PRIVATE_KEY }}
+
+      - name: Create PR
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_WORKFLOW_ACTOR: ${{ github.actor }}
+        run: |
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git config user.name "${{ github.actor }}"
+          ./_tools/release/release_create_pr.ts

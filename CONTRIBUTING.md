@@ -47,3 +47,21 @@ To check report, run the following:
 ```sh
 deno task report
 ```
+
+## Release Process
+
+```mermaid
+flowchart TD
+    s(Start)
+    e(End)
+    vb(CI: version bump)
+    pr(Review pull request)
+    cr(Create release)
+    rp(CI: release packages)
+
+    s --> vb
+    vb -->|Create PR| pr
+    pr -->|Merge| cr
+    cr -->|Check versions are correct| rp
+    rp --> e
+```
