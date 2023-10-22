@@ -1,6 +1,6 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import type {
+import {
   SetupTestsConfig,
   SetupTestsFactoryPlugins,
   SetupTestsFactoryResult,
@@ -8,7 +8,7 @@ import type {
   SetupTestsPluginTeardown,
   SetupTestsResult,
   SetupTestsTeardown,
-} from "./setup_tests.type.ts";
+} from "./type.ts";
 
 /**
  * Set up tests with defined plugins.
@@ -28,9 +28,10 @@ import type {
  * const helloWorldPlugin = {
  *   setup: (config: { message: string }) => {
  *     // Setup plugin according to config
- *   },
- *   teardown: () => {
- *    // Teardown any setup resources
+ *     return {
+ *       output: config,
+ *       teardown: () => {}
+ *     }
  *   },
  * }
  *
@@ -56,17 +57,6 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
     this.#plugins = plugins;
   }
 
-  #buildPluginTeardown<Config, Result>(
-    pluginName: string,
-    config: Config,
-    result: Result,
-  ): SetupTestsPluginTeardown {
-    const plugin = this.#plugins[pluginName];
-    return () => {
-      return plugin.teardown(config, result);
-    };
-  }
-
   #buildTeardown(teardowns: SetupTestsPluginTeardown[]): SetupTestsTeardown {
     return async () => {
       for (const teardown of teardowns) {
@@ -75,79 +65,42 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
     };
   }
 
-  /**
-   * Setup tests use the loaded plugins.
-   *
-   * The loaded plugins available to the setupTests function returned
-   * from the factory can be configured using config namespaced to the
-   * name of the plugin. For example, if the plugin is named `helloWorld`,
-   * then the config for that plugin must be provided under the `helloWorld`
-   * namespace.
-   *
-   * When run, setupTests will return an object with the data returned from
-   * the plugin invocation. The data will be namespaced to the plugin name.
-   *
-   * Only plugins that are configured will be run. If a plugin is not configured,
-   * then it will not be run. The order of the plugins in the config is defined
-   * the order in which they defined in the config object. This follows the rules as
-   * defined [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in#description).
-   *
-   * The returned object will also contain a `teardown` function that when
-   * run, will teardown the plugins in the reverse order that they were
-   * setup.
-   *
-   * ```typescript
-   * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
-   *
-   * const helloWorldPlugin = {
-   *   setup: (config: { message: string }) => {
-   *     // Setup plugin according to config
-   *   },
-   *   teardown: () => {
-   *    // Teardown any setup resources
-   *   },
-   * }
-   *
-   * const { setupTests } = setupTestsFactory({
-   *   helloWorld: helloWorldPlugin,
-   * });
-   *
-   * const result = await setupTests({
-   *   helloWorld: {
-   *     message: "Hello World!",
-   *   }
-   * })
-   *
-   * console.log(result.data.helloWorld); // "Hello World!"
-   *
-   * await result.teardownTests();
-   * ```
-   */
   async setupTests<Config extends SetupTestsConfig<Plugins>>(
     config: Config,
   ): Promise<SetupTestsResult<Plugins, Config>> {
-    let data = {};
+    let outputs = {} as SetupTestsResult<Plugins, Config>["outputs"];
     const teardowns: SetupTestsPluginTeardown[] = [];
     const { ...pluginsConfig } = config;
     for (const [pluginName, pluginConfig] of Object.entries(pluginsConfig)) {
       // TODO: add in when generic config is added
       // assertAllowedPluginName(pluginName);
       const plugin = this.#plugins[pluginName];
-      const result = await plugin.setup(pluginConfig);
-      data = {
-        ...data,
-        [pluginName]: result,
+      const { teardown, output } = await plugin.setup(pluginConfig);
+      const pluginOutput = {
+        output,
+        teardown,
+      } as Awaited<ReturnType<Plugins[keyof Plugins]["setup"]>>;
+      outputs = {
+        ...outputs,
+        [pluginName]: pluginOutput,
       };
       teardowns.push(
-        this.#buildPluginTeardown(pluginName, pluginConfig, result),
+        teardown,
       );
     }
 
     return {
-      data: data as SetupTestsResult<Plugins, Config>["data"],
+      outputs,
       teardownTests: this.#buildTeardown(teardowns.reverse()).bind(this),
     };
   }
+}
+
+/**
+ * Assert that the input is never and not unexpected.
+ */
+export function assertNever(_input: never, message: string): never {
+  throw new Error(message);
 }
 
 // TODO: add in when generic config is added
@@ -166,9 +119,12 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
 //   }
 // }
 
-/**
- * SetupTestsError
- */
-export class SetupTestsError extends Error {
-  override name = "SetupTestsError";
-}
+// /**
+//  * SetupTestsError
+//  */
+// export class SetupTestsError extends Error {
+//   /**
+//    * name of the error.
+//    */
+//   override name = "SetupTestsError";
+// }

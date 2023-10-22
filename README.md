@@ -1,5 +1,7 @@
 # nifty_lil_tricks_testing
 
+**Note: this package and selected plugins are currently a work in progress**
+
 [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing)
 [![GitHub License](https://img.shields.io/github/license/jonnydgreen/nifty-lil-tricks-testing?style=flat-square)](https://raw.githubusercontent.com/jonnydgreen/nifty-lil-tricks-testing/main/LICENSE)
 [![Buy us a tree](https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen)](https://plant.treeware.earth/jonnydgreen/nifty-lil-tricks-testing)
@@ -31,6 +33,7 @@ The following features are supported
   test suite for testing with loaded plugins through a simple to use interface.
 - Teardown functionality for restoring the state of the environment after tests
   have run.
+- Ready-made plugins to get started with straight-away.
 
 ### Setup tests
 
@@ -56,10 +59,10 @@ import {
 const helloWorldPlugin = {
   setup: (config: { message: string }) => {
     // Setup plugin according to config
-    return config.message;
-  },
-  teardown: () => {
-    // Teardown any setup resources
+    return {
+      output: config,
+      teardown: () => {},
+    };
   },
 };
 
@@ -78,7 +81,7 @@ describe("Service", () => {
     const result = await setupTests({
       helloWorld: { message: "Hello, world!" },
     });
-    message = result.data.helloWorld;
+    message = result.outputs.helloWorld.output.message;
     teardownTests = result.teardownTests;
   });
 
@@ -118,7 +121,7 @@ An example of a plugin is as follows:
 
 ```typescript
 import {
-  type SetupTestsPlugin,
+  type Plugin,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 
 interface HelloWorldConfig {
@@ -127,13 +130,15 @@ interface HelloWorldConfig {
 
 type HelloWorldResult = string;
 
-const helloWorldPlugin: SetupTestsPlugin<HelloWorldConfig, HelloWorldResult> = {
+const helloWorldPlugin: Plugin<HelloWorldConfig, HelloWorldResult> = {
   setup(config: HelloWorldConfig) {
     // Setup plugin according to config
-    return config.message;
-  },
-  teardown(config: HelloWorldConfig, result: HelloWorldResult) {
-    // Teardown any setup resources
+    return {
+      output: config.message,
+      teardown() {
+        // Teardown any setup resources
+      },
+    };
   },
 };
 ```
@@ -161,10 +166,12 @@ import {
 const helloWorldPlugin = {
   setup: (config: { message: string }) => {
     // Setup plugin according to config
-    return config.message;
-  },
-  teardown: () => {
-    // Teardown any setup resources
+    return {
+      output: config.message,
+      teardown: () => {
+        // Teardown any setup resources
+      },
+    };
   },
 };
 
@@ -177,7 +184,7 @@ const result = await setupTests({
   helloWorld: { message: "Hello, world!" },
 });
 
-result.data.helloWorld; // "Hello, world!"
+result.outputs.helloWorld.output; // "Hello, world!"
 ```
 
 Only plugins that are configured will be run. If a plugin is not configured,
@@ -206,10 +213,12 @@ import {
 const helloWorldPlugin = {
   setup: (config: { message: string }) => {
     // Setup plugin according to config
-    return config.message;
-  },
-  teardown: () => {
-    // Teardown any setup resources
+    return {
+      output: config.message,
+      teardown: () => {
+        // Teardown any setup resources
+      },
+    };
   },
 };
 
@@ -226,7 +235,16 @@ const result = await setupTests({
 await result.teardownTests();
 ```
 
-## API
+### Plugins
+
+The following plugins are available:
+
+| Plugin                                    | Description                                                                                                                                                                                                                                                                                                                                                                                 | Status             | Docs                                                                                                   |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------ |
+| [PostgreSQl](https://www.postgresql.org/) | Setup the World's Most Advanced Open Source Relational Database for testing. It has the following features: <br><ul><li>Setup a Postgresql server in [Docker](https://www.docker.com/) for testing.</li><li>Setup an existing Postgresql server for testing.</li><li>Run migrations on the configured Postgresql server.</li><li>Seed the configured Postgresql server with data.</li></ul> | :white_check_mark: | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_postgresql/README.md). |
+| [NestJS Server](https://nestjs.com/)      | Setup a progressive Node.js framework for building efficient, reliable and scalable server-side applications for testing.                                                                                                                                                                                                                                                                   | :construction:     | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_nestjs/README.md)      |
+
+## [WIP] API
 
 The API docs can be found
 [here](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/docs/api/modules.md)

@@ -1,6 +1,6 @@
 .DS_Store
 .idea
-.vscode/settings.json
+.vscode/
 .vim
 **/cov/
 deno.lock
@@ -11,3 +11,4 @@ node_modules/
 package-lock.json
 cov.lcov
 html_cov
+sandbox/

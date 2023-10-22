@@ -18,6 +18,7 @@ const EXCLUDED_PATHS = [
   "npm",
   "examples/nifty-lil-tricks-testing-nodejs",
   "scripts",
+  "sandbox",
 ];
 
 const ROOT = new URL("../", import.meta.url);
@@ -51,12 +52,15 @@ function checkImportStatements(
     const isInternal = importPath.startsWith(
       "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/",
     );
+    const isAllowedExternalDep = importPath.startsWith(
+      "https://deno.land/x/postgres@v0.17.0/",
+    );
     const isStdLib = importPath.startsWith("https://deno.land/std/");
     const { line } = sourceFile.getLineAndCharacterOfPosition(
       moduleSpecifier.pos,
     );
 
-    if (isRelative || !(isInternal || isStdLib)) {
+    if (isRelative || !(isInternal || isStdLib || isAllowedExternalDep)) {
       console.log(
         yellow("Warn ") +
           (isRelative

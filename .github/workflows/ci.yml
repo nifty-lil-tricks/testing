@@ -28,8 +28,17 @@ jobs:
         with:
           deno-version: ${{ matrix.deno }}
 
+      - name: Run checks
+        run: deno task check
+
       - name: Run tests
         run: deno task test
+        env:
+          IGNORE_DOCKER_TESTS: ${{ matrix.os == 'ubuntu-latest' && 'false' || 'true' }}
+
+      - name: Run examples tests
+        if: matrix.os == 'ubuntu-latest'
+        run: deno task test:examples
 
       # TODO: add later
       # - name: Type check browser compatible modules
@@ -44,8 +53,6 @@ jobs:
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           name: ${{ matrix.os }}-${{ matrix.deno }}
           files: cov.lcov
@@ -105,7 +112,7 @@ jobs:
       - name: Set up Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: vx.x.x
+          deno-version: v1.x
 
       - name: Build npm
         run: deno task build

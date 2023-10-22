@@ -1,9 +1,9 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
+import { assertEquals, assertInstanceOf } from "std/testing/asserts.ts";
 import { beforeEach, describe, it } from "std/testing/bdd.ts";
-import { assertEquals } from "std/testing/asserts.ts";
 import { setupTestsFactory } from "./setup_tests.ts";
-import type { SetupTestsFn, SetupTestsPlugin } from "./setup_tests.type.ts";
+import { Plugin, SetupTestsFn } from "./type.ts";
 
 describe("setupTestsFactory", () => {
   let setupTests: SetupTestsFn<Plugins>;
@@ -23,12 +23,18 @@ describe("setupTestsFactory", () => {
       const plugin1Config: Plugin1Config = { data1: ["1"] };
 
       // Act
-      const result = await setupTests({
+      const { teardownTests, outputs } = await setupTests({
         plugin1: plugin1Config,
       });
 
       // Assert
-      assertEquals(result.data, { plugin1: { plugin1Result: plugin1Config } });
+      assertInstanceOf(teardownTests, Function);
+      assertEquals(outputs, {
+        plugin1: {
+          output: { plugin1Result: plugin1Config },
+          teardown: teardown1,
+        },
+      });
     });
 
     it("should run plugins and return the results when all plugins are activated", async () => {
@@ -37,15 +43,22 @@ describe("setupTestsFactory", () => {
       const plugin2Config: Plugin2Config = { data2: [2] };
 
       // Act
-      const result = await setupTests({
+      const { teardownTests, outputs } = await setupTests({
         plugin1: plugin1Config,
         plugin2: plugin2Config,
       });
 
       // Assert
-      assertEquals(result.data, {
-        plugin1: { plugin1Result: plugin1Config },
-        plugin2: { plugin2Result: plugin2Config },
+      assertInstanceOf(teardownTests, Function);
+      assertEquals(outputs, {
+        plugin1: {
+          output: { plugin1Result: plugin1Config },
+          teardown: teardown1,
+        },
+        plugin2: {
+          output: { plugin2Result: plugin2Config },
+          teardown: teardown2,
+        },
       });
     });
   });
@@ -84,8 +97,8 @@ describe("setupTestsFactory", () => {
 });
 
 type Plugins = {
-  plugin1: SetupTestsPlugin<Plugin1Config, Plugin1Result>;
-  plugin2: SetupTestsPlugin<Plugin2Config, Plugin2Result>;
+  plugin1: Plugin<Plugin1Config, Plugin1Result>;
+  plugin2: Plugin<Plugin2Config, Plugin2Result>;
 };
 
 interface Plugin1Config {
@@ -106,20 +119,28 @@ interface Plugin2Result {
 
 let teardownCalls: string[] = [];
 
-const plugin1: SetupTestsPlugin<Plugin1Config, Plugin1Result> = {
+function teardown1() {
+  teardownCalls.push("plugin1.teardown");
+}
+
+const plugin1: Plugin<Plugin1Config, Plugin1Result> = {
   setup(config: Plugin1Config) {
-    return { plugin1Result: config };
-  },
-  teardown() {
-    teardownCalls.push("plugin1.teardown");
+    return {
+      output: { plugin1Result: config },
+      teardown: teardown1,
+    };
   },
 };
 
-const plugin2: SetupTestsPlugin<Plugin2Config, Plugin2Result> = {
+function teardown2() {
+  teardownCalls.push("plugin2.teardown");
+}
+
+const plugin2: Plugin<Plugin2Config, Plugin2Result> = {
   setup(config: Plugin2Config) {
-    return { plugin2Result: config };
-  },
-  teardown() {
-    teardownCalls.push("plugin2.teardown");
+    return {
+      output: { plugin2Result: config },
+      teardown: teardown2,
+    };
   },
 };
