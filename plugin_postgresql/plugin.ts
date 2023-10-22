@@ -133,14 +133,14 @@ class PluginFactory {
  * @example
  * ```ts
  * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, ServerStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
  * const { teardownTests } = await setupTests({
  *   database: {
  *     server: { strategy: ServerStrategy.DOCKER },
- *   },
+ *   } as PluginConfig,
  * });
  *
  * // Do work
@@ -153,11 +153,11 @@ class PluginFactory {
  * @example
  * ```ts
  * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, Server } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, Server } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
- * const server = new Server("instanceId", {
+ * const server = new Server("id", {
  *   serverName: "serverName",
  *   hostname: "hostname",
  *   port: 1234,
@@ -179,7 +179,7 @@ class PluginFactory {
  * @example
  * ```ts
  * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
@@ -189,7 +189,7 @@ class PluginFactory {
  *     migrate: {
  *       strategy: MigrationStrategy.SQL,
  *     },
- *   },
+ *   } as PluginConfig,
  * });
  *
  * // Do work
@@ -202,7 +202,7 @@ class PluginFactory {
  * @example
  * ```ts
  * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
@@ -218,7 +218,7 @@ class PluginFactory {
  *         { email: "email 2", name: "name 2" },
  *       ],
  *     },
- *   },
+ *   } as PluginConfig,
  * });
  *
  * // Do work
@@ -231,11 +231,11 @@ class PluginFactory {
  * @example
  * ```ts
  * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, Server, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, Server, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
- * const server = new Server("instanceId", {
+ * const server = new Server("id", {
  *   serverName: "serverName",
  *   hostname: "hostname",
  *   port: 1234,
@@ -255,7 +255,7 @@ class PluginFactory {
  *         { email: "email 2", name: "name 2" },
  *       ],
  *     },
- *   },
+ *   } as PluginConfig,
  * });
  *
  * // Do work
@@ -267,7 +267,142 @@ class PluginFactory {
 export const postgreSqlPlugin = new PluginFactory().create();
 
 /**
- * PostgreSQL Plugin Config.
+ * The PostgreSQL Plugin config. One can find example configurations below:
+ *
+ * **Basic server setup:**
+ * @example
+ * ```ts
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
+ *
+ * const { teardownTests } = await setupTests({
+ *   database: {
+ *     server: { strategy: ServerStrategy.DOCKER },
+ *   } as PluginConfig,
+ * });
+ *
+ * // Do work
+ *
+ * // Teardown when finished
+ * await teardownTests();
+ * ```
+ *
+ * **Existing server setup:**
+ * @example
+ * ```ts
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, Server } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
+ *
+ * const server = new Server("id", {
+ *   serverName: "serverName",
+ *   hostname: "hostname",
+ *   port: 1234,
+ *   user: "user",
+ *   password: "password",
+ *   database: "database",
+ * });
+ * const { teardownTests } = await setupTests({
+ *   database: { server },
+ * });
+ *
+ * // Do work
+ *
+ * // Teardown when finished
+ * await teardownTests(); // No-op
+ * ```
+ *
+ * **Server setup with migrations:**
+ * @example
+ * ```ts
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
+ *
+ * const { teardownTests } = await setupTests({
+ *   database: {
+ *     server: { strategy: ServerStrategy.DOCKER },
+ *     migrate: {
+ *       strategy: MigrationStrategy.SQL,
+ *     },
+ *   } as PluginConfig,
+ * });
+ *
+ * // Do work
+ *
+ * // Teardown when finished
+ * await teardownTests();
+ * ```
+ *
+ * **Server setup with migrations and seeding:**
+ * @example
+ * ```ts
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
+ *
+ * const { teardownTests } = await setupTests({
+ *   database: {
+ *     server: { strategy: ServerStrategy.DOCKER },
+ *     migrate: {
+ *       strategy: MigrationStrategy.SQL,
+ *     },
+ *     seed: {
+ *       User: [
+ *         { email: "email 1", name: "name 1" },
+ *         { email: "email 2", name: "name 2" },
+ *       ],
+ *     },
+ *   } as PluginConfig,
+ * });
+ *
+ * // Do work
+ *
+ * // Teardown when finished
+ * await teardownTests();
+ * ```
+ *
+ * **Migrations and seeding against existing server:**
+ * @example
+ * ```ts
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, Server, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
+ *
+ * const server = new Server("id", {
+ *   serverName: "serverName",
+ *   hostname: "hostname",
+ *   port: 1234,
+ *   user: "user",
+ *   password: "password",
+ *   database: "database",
+ * });
+ * const { teardownTests } = await setupTests({
+ *   database: {
+ *     server,
+ *     migrate: {
+ *       strategy: MigrationStrategy.SQL,
+ *     },
+ *     seed: {
+ *       User: [
+ *         { email: "email 1", name: "name 1" },
+ *         { email: "email 2", name: "name 2" },
+ *       ],
+ *     },
+ *   } as PluginConfig,
+ * });
+ *
+ * // Do work
+ *
+ * // Teardown when finished
+ * await teardownTests();
+ * ```
  */
 export interface PluginConfig {
   /**

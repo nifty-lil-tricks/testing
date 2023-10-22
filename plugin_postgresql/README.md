@@ -16,7 +16,7 @@ A nifty li'l plugin for setting up PostgreSQL database instances when testing
 ### Deno
 
 ```typescript
-import * as testing from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+import { postgreSqlPlugin } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
 ```
 
 ### Node.js
@@ -54,6 +54,7 @@ import {
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import {
   MigrationStrategy,
+  type PluginConfig,
   postgreSqlPlugin,
   Server,
   ServerStrategy,
@@ -84,7 +85,7 @@ describe("Service", () => {
             { email: "email 2", name: "name 2" },
           ],
         },
-      },
+      } as PluginConfig,
     });
     teardownTests = result.teardownTests;
     server = result.outputs.database.output.server;
@@ -137,6 +138,7 @@ import {
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import {
   MigrationStrategy,
+  type PluginConfig,
   postgreSqlPlugin,
   Server,
   ServerStrategy,
@@ -157,7 +159,7 @@ describe("Service", () => {
       database: {
         // Setup server using the Docker strategy
         server: { strategy: ServerStrategy.DOCKER },
-      },
+      } as PluginConfig,
     });
     teardownServer = result.teardownTests;
     server = result.outputs.database.output.server;
@@ -180,7 +182,7 @@ describe("Service", () => {
             { email: "email 2", name: "name 2" },
           ],
         },
-      },
+      } as PluginConfig,
     });
     teardownTests = result.teardownTests;
   });
@@ -227,6 +229,13 @@ Examples can be found
 | Node.JS `v18`    | :white_check_mark: | TypeScript v5+ for typings |
 | Node.JS `v20`    | :white_check_mark: | TypeScript v5+ for typings |
 | Web Browsers     | :x:                | Coming soon                |
+
+**Note:** due to limitations in GitHub Actions, some of the above features are
+not able to be automatically tested on the following platforms. However, they
+are still supported and will be tested locally before release:
+
+- Windows
+- MacOS
 
 ## Useful links
 

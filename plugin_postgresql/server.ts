@@ -8,23 +8,32 @@ import { Client } from "x/postgres/client.ts";
  */
 export class Server {
   constructor(
-    instanceId: string,
+    /**
+     * The ID of the PostgreSQL Server.
+     */
+    id: string,
+    /**
+     * The connection details for the PostgreSQL Server.
+     */
     connection: Connection,
   ) {
-    this.instanceId = instanceId;
+    this.id = id;
     this.connection = connection;
   }
 
   /**
-   * The ID of the PostgreSQL instance.
+   * The ID of the PostgreSQL Server instance.
    */
-  public readonly instanceId: string;
+  public readonly id: string;
 
   /**
-   * The connection details for the PostgreSQL instance.
+   * The connection details for the PostgreSQL Server instance.
    */
   public readonly connection: Connection;
 
+  /**
+   * Initialize the PostgreSQL Server. Although safe to call, this is generally for internal use only.
+   */
   public async init(): Promise<void> {
     let shouldReturn = false;
     const client = new Client({

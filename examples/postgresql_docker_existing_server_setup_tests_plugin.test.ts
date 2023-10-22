@@ -15,6 +15,7 @@ import {
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import {
   MigrationStrategy,
+  type PluginConfig,
   postgreSqlPlugin,
   Server,
   ServerStrategy,
@@ -36,7 +37,7 @@ describe("Service", () => {
       database: {
         // Setup server using the Docker strategy
         server: { strategy: ServerStrategy.DOCKER },
-      },
+      } as PluginConfig,
     });
     teardownServer = result.teardownTests;
     server = result.outputs.database.output.server;
@@ -59,7 +60,7 @@ describe("Service", () => {
             { email: "email 2", name: "name 2" },
           ],
         },
-      },
+      } as PluginConfig,
     });
     teardownTests = result.teardownTests;
   });

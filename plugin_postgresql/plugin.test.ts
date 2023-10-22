@@ -55,7 +55,7 @@ describe("postgreSqlPlugin", () => {
 
     it("should error if unknown migration strategy is provided", async () => {
       // Arrange
-      const server = new Server("instanceId", {
+      const server = new Server("id", {
         serverName: "serverName",
         hostname: "hostname",
         port: 1234,

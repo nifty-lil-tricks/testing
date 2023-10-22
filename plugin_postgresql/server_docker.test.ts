@@ -77,16 +77,15 @@ describe("postgreSqlPlugin", { ignore }, () => {
           {
             args: [
               "inspect",
-              result.outputs.database.output.server.instanceId,
+              result.outputs.database.output.server.id,
             ],
           },
         ).output();
         const details = JSON.parse(
           new TextDecoder().decode(rawDetails.stdout).trim(),
         );
-        const { instanceId, connection } =
-          result.outputs.database.output.server;
-        assertEquals(details?.[0]?.Id, instanceId);
+        const { id, connection } = result.outputs.database.output.server;
+        assertEquals(details?.[0]?.Id, id);
         const client = new Client({ tls: { enabled: false }, ...connection });
         await client.connect();
         await client.end();
@@ -364,7 +363,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
             args: [
               "inspect",
               '--format="{{.ID}}"',
-              result.outputs.database.output.server.instanceId,
+              result.outputs.database.output.server.id,
             ],
           },
         ).output();

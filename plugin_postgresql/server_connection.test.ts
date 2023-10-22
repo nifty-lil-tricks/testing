@@ -23,7 +23,7 @@ describe("postgreSqlPlugin", () => {
     teardownTests = (() => {
       // No-op in-case this is not set
     }) as SetupTestsTeardown;
-    server = new Server("instanceId", {
+    server = new Server("id", {
       serverName: "serverName",
       hostname: "hostname",
       port: 1234,

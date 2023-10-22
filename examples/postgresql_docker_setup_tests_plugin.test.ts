@@ -13,6 +13,7 @@ import {
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
 import {
   MigrationStrategy,
+  type PluginConfig,
   postgreSqlPlugin,
   Server,
   ServerStrategy,
@@ -28,7 +29,6 @@ describe("Service", () => {
   let server: Server;
 
   beforeEach(async () => {
-    // Setup tests with configured plugins
     const result = await setupTests({
       database: {
         // Setup server using the Docker strategy
@@ -44,7 +44,7 @@ describe("Service", () => {
             { email: "email 2", name: "name 2" },
           ],
         },
-      },
+      } as PluginConfig,
     });
     teardownTests = result.teardownTests;
     server = result.outputs.database.output.server;

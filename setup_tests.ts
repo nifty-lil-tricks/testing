@@ -65,55 +65,6 @@ class SetupTestsService<Plugins extends SetupTestsPlugins>
     };
   }
 
-  /**
-   * Setup tests use the loaded plugins.
-   *
-   * The loaded plugins available to the setupTests function returned
-   * from the factory can be configured using config namespaced to the
-   * name of the plugin. For example, if the plugin is named `helloWorld`,
-   * then the config for that plugin must be provided under the `helloWorld`
-   * namespace.
-   *
-   * When run, setupTests will return an object with the data returned from
-   * the plugin invocation. The data will be namespaced to the plugin name.
-   *
-   * Only plugins that are configured will be run. If a plugin is not configured,
-   * then it will not be run. The order of the plugins in the config is defined
-   * the order in which they defined in the config object. This follows the rules as
-   * defined [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in#description).
-   *
-   * The returned object will also contain a `teardown` function that when
-   * run, will teardown the plugins in the reverse order that they were
-   * setup.
-   *
-   * ```typescript
-   * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
-   *
-   * const helloWorldPlugin = {
-   *   setup: (config: { message: string }) => {
-   *     // Setup plugin according to config
-   *     return {
-   *       output: config,
-   *       teardown: () => {}
-   *     }
-   *   },
-   * }
-   *
-   * export const { setupTests } = setupTestsFactory({
-   *   helloWorld: helloWorldPlugin,
-   * });
-   *
-   * const result = await setupTests({
-   *   helloWorld: {
-   *     message: "Hello World!",
-   *   }
-   * })
-   *
-   * console.log(result.outputs.helloWorld.output); // "Hello World!"
-   *
-   * await result.teardownTests();
-   * ```
-   */
   async setupTests<Config extends SetupTestsConfig<Plugins>>(
     config: Config,
   ): Promise<SetupTestsResult<Plugins, Config>> {
@@ -172,5 +123,8 @@ export function assertNever(_input: never, message: string): never {
 //  * SetupTestsError
 //  */
 // export class SetupTestsError extends Error {
+//   /**
+//    * name of the error.
+//    */
 //   override name = "SetupTestsError";
 // }
