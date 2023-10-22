@@ -9,6 +9,15 @@
 
 A selection of useful utilities (or nifty li'l tricks!) for all things testing.
 
+### Plugins
+
+The following plugins are available:
+
+| Plugin                                    | Description                                                                                                                                                                                                                                                                                                                                                                                 | Status             | Npm                                                                                                                                                                                        | Docs                                                                                                   |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| [PostgreSQl](https://www.postgresql.org/) | Setup the World's Most Advanced Open Source Relational Database for testing. It has the following features: <br><ul><li>Setup a Postgresql server in [Docker](https://www.docker.com/) for testing.</li><li>Setup an existing Postgresql server for testing.</li><li>Run migrations on the configured Postgresql server.</li><li>Seed the configured Postgresql server with data.</li></ul> | :white_check_mark: | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-postgresql?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-postgresql) | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_postgresql/README.md). |
+| [NestJS Server](https://nestjs.com/)      | Setup a progressive Node.js framework for building efficient, reliable and scalable server-side applications for testing.                                                                                                                                                                                                                                                                   | :construction:     | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-nestjs?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-nestjs)         | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_nestjs/README.md)      |
+
 ## Installation
 
 **Note: this package works with TypeScript v5 or later**
@@ -234,15 +243,6 @@ const result = await setupTests({
 // Teardown tests to restore environment after tests have run
 await result.teardownTests();
 ```
-
-### Plugins
-
-The following plugins are available:
-
-| Plugin                                    | Description                                                                                                                                                                                                                                                                                                                                                                                 | Status             | Docs                                                                                                   |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------ |
-| [PostgreSQl](https://www.postgresql.org/) | Setup the World's Most Advanced Open Source Relational Database for testing. It has the following features: <br><ul><li>Setup a Postgresql server in [Docker](https://www.docker.com/) for testing.</li><li>Setup an existing Postgresql server for testing.</li><li>Run migrations on the configured Postgresql server.</li><li>Seed the configured Postgresql server with data.</li></ul> | :white_check_mark: | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_postgresql/README.md). |
-| [NestJS Server](https://nestjs.com/)      | Setup a progressive Node.js framework for building efficient, reliable and scalable server-side applications for testing.                                                                                                                                                                                                                                                                   | :construction:     | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_nestjs/README.md)      |
 
 ## [WIP] API
 

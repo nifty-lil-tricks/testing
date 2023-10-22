@@ -1,13 +1,14 @@
-#!/usr/bin/env -S deno run --allow-read --allow-write --allow-env --allow-net --allow-run=git --no-check
+#!/usr/bin/env -S deno run --allow-read --allow-write --allow-env --allow-net --allow-run=git,npm --no-check
 
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { packages } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/_tools/release_packages.ts";
+// import { containsVersion, createOctoKit, getGitHubRepository } from "./deps.ts";
+import { packages } from "./release_packages.ts";
 import { loadRepo, VersionFile } from "./release_repo.ts";
 
 const repo = await loadRepo();
 
-// TODO: uncomment this when we're ready to release
+// TODO
 // // only run this for commits that contain a version number in the commit message
 // if (!containsVersion(await repo.gitCurrentCommitMessage())) {
 //   console.log("Exiting: No version found in commit name.");
@@ -23,6 +24,7 @@ const repo = await loadRepo();
 // now attempt to create a release by tagging
 // the repo and creating a draft release
 const versionFile = new VersionFile();
+// TODO
 // const releasesMd = getReleasesMdFile();
 
 await repo.gitFetchTags("origin");
@@ -33,14 +35,13 @@ if (repoTags.has(tagName)) {
   console.log(`Tag ${tagName} already exists.`);
 } else {
   console.log(`Tagging ${tagName}...`);
-  // TODO: uncomment
-  // await repo.gitTag(tagName);
-  // await repo.gitPush("origin", tagName);
+  await repo.gitTag(tagName);
+  await repo.gitPush("origin", tagName);
 
   await publishNpm();
 
-  // TODO: uncomment
-  // console.log(`Creating GitHub release...`);
+  console.log(`Creating GitHub release...`);
+  // TODO
   // await createOctoKit().request(`POST /repos/{owner}/{repo}/releases`, {
   //   ...getGitHubRepository(),
   //   tag_name: tagName,
@@ -54,8 +55,9 @@ async function publishNpm(): Promise<void> {
   for (const pkg of packages) {
     console.log(`Publishing ${pkg.name} to npm...`);
     const command = new Deno.Command("npm", {
-      // TODO: remove dry run
-      args: ["publish", "--dry-run"],
+      // TODO
+      args: ["publish", "--access", "public", "--dry-run"],
+      // args: ["publish", "--access", "public"],
       cwd: pkg.dir,
     });
     const output = await command.output();
