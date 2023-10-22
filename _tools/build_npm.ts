@@ -117,6 +117,10 @@ for (const pkg of filteredPackages) {
         join(outDir, "LICENSE"),
       );
       await Deno.copyFile(
+        join(rootDir, ".npmrc"),
+        join(outDir, ".npmrc"),
+      );
+      await Deno.copyFile(
         join(pkg.dir, "README.md"),
         join(outDir, "README.md"),
       );
@@ -141,6 +145,12 @@ for (const pkg of filteredPackages) {
     test: false,
   });
   await adjustPackageJson(pkg, outDir);
+}
+
+// Cleanup to ensure the uploaded artifacts do not include node_modules
+for (const pkg of packages) {
+  const outDir = join(rootDir, "./npm", pkg.name);
+  await Deno.remove(join(outDir, "node_modules"), { recursive: true });
 }
 
 async function adjustPackageJson(pkg: Package, outDir: string): Promise<void> {

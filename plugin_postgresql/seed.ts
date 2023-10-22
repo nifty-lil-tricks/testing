@@ -54,7 +54,6 @@ export class SeedStrategy implements SeedStrategyContract {
         const query = `INSERT INTO "${table}" (${columns}) VALUES ${
           rowValueRefs.join(", ")
         };`;
-        // TODO: add result to output
         const queryResult = await client.queryObject(query, values);
         results.push({
           query: queryResult.query.text,

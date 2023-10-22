@@ -2,7 +2,7 @@
 
 **Note: this package is currently a work in progress**
 
-[![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-postgresql)
+[![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-postgresql?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-postgresql)
 [![GitHub License](https://img.shields.io/github/license/jonnydgreen/nifty-lil-tricks-testing?style=flat-square)](https://raw.githubusercontent.com/jonnydgreen/nifty-lil-tricks-testing/main/LICENSE)
 [![Buy us a tree](https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen)](https://plant.treeware.earth/jonnydgreen/nifty-lil-tricks-testing)
 [![codecov](https://codecov.io/gh/jonnydgreen/nifty-lil-tricks-testing/branch/main/graph/badge.svg)](https://codecov.io/gh/jonnydgreen/nifty-lil-tricks-testing)
