@@ -1,3 +1,8 @@
+### 0.3.0 / 2023.10.24
+
+- Fix issues with client
+- Fix issues with client (#13)
+
 ### 0.2.2 / 2023.10.22
 
 ### 0.2.1 / 2023.10.22
