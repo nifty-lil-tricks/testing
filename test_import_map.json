@@ -4,7 +4,6 @@
     "x/deno_doc/": "https://deno.land/x/deno_doc@0.59.0/",
     "x/deno_graph/": "https://deno.land/x/deno_graph@0.37.1/",
     "x/dnt/": "https://deno.land/x/dnt@0.34.0/",
-    "x/postgres/": "https://deno.land/x/postgres@v0.17.0/",
     "x/port/": "https://deno.land/x/port@1.0.0/",
     "typescript": "npm:typescript@5.0.2",
     "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/": "./"

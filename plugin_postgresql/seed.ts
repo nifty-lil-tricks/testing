@@ -1,6 +1,6 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { Client } from "x/postgres/client.ts";
+import { Client } from "./client.ts";
 import type { Connection } from "./server.ts";
 
 /**
@@ -26,13 +26,9 @@ export class SeedStrategy implements SeedStrategyContract {
   }
 
   public async run(): Promise<SeedOutput> {
-    const client = new Client({
-      tls: { enabled: false },
-      ...this.#connection,
-    });
+    const client = new Client(this.#connection);
     await client.connect();
     try {
-      const warnings: unknown[] = [];
       const results: SeedResult[] = [];
       for (const [table, rows] of Object.entries(this.#config)) {
         const columns = Object.keys(rows[0]);
@@ -54,15 +50,14 @@ export class SeedStrategy implements SeedStrategyContract {
         const query = `INSERT INTO "${table}" (${columns}) VALUES ${
           rowValueRefs.join(", ")
         };`;
-        const queryResult = await client.queryObject(query, values);
+        const queryResult = await client.query(query, values);
         results.push({
-          query: queryResult.query.text,
-          args: queryResult.query.args.map((arg) => String(arg)),
+          query: queryResult.query,
+          args: queryResult.args.map((arg) => String(arg)),
           insertedCount: queryResult.rowCount,
         });
-        warnings.push(...queryResult.warnings);
       }
-      return { results, warnings };
+      return { results };
     } finally {
       await client.end();
     }
@@ -100,8 +95,4 @@ export interface SeedOutput {
    * The Seed results.
    */
   readonly results: SeedResult[];
-  /**
-   * The Seed warnings. If no warning, the array will be empty.
-   */
-  readonly warnings: unknown[];
 }

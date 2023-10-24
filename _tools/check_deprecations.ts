@@ -17,6 +17,7 @@ const EXCLUDED_PATHS = [
   "examples/nifty-lil-tricks-testing-nodejs",
   "scripts",
   "sandbox",
+  "plugin_postgresql/client.ts",
 ];
 
 const ROOT = new URL("../", import.meta.url);

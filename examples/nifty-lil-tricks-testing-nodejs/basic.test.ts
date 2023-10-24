@@ -10,10 +10,10 @@ import t from "tap";
 const helloWorldPlugin = {
   setup: (config: { message: string }) => {
     // Setup plugin according to config
-    return config.message;
-  },
-  teardown: () => {
-    // Teardown any setup resources
+    return {
+      output: config,
+      teardown: () => {},
+    };
   },
 };
 
@@ -27,16 +27,16 @@ t.test("basic", async (t) => {
   let message: string;
 
   t.beforeEach(async () => {
-    // Setup tests
+    // Setup tests with configured plugins
     const result = await setupTests({
       helloWorld: { message: "Hello, world!" },
     });
-    message = result.data.helloWorld;
+    message = result.outputs.helloWorld.output.message;
     teardownTests = result.teardownTests;
   });
 
   t.afterEach(async () => {
-    // Teardown tests
+    // Teardown tests to restore environment after tests have run
     await teardownTests();
   });
 

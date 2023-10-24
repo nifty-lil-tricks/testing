@@ -20,7 +20,7 @@ import {
   stub,
 } from "std/testing/mock.ts";
 import { getAvailablePort } from "x/port/mod.ts";
-import { Client } from "x/postgres/mod.ts";
+import { Client } from "./client.ts";
 import { type PostgreSqlPlugin, postgreSqlPlugin } from "./plugin.ts";
 import { ServerStrategy } from "./server.ts";
 import { DockerServerError } from "./server_docker.ts";
@@ -83,7 +83,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
         );
         const { id, connection } = result.outputs.database.output.server;
         assertEquals(details?.[0]?.Id, id);
-        const client = new Client({ tls: { enabled: false }, ...connection });
+        const client = new Client(connection);
         await client.connect();
         await client.end();
         assertSpyCalls(consoleWarnStub, 0);

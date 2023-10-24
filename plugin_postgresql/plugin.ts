@@ -102,7 +102,10 @@ class PluginFactory {
     }
     switch (config.migrate.strategy) {
       case MigrationStrategy.SQL: {
-        const strategy = new SqlMigrationStrategy(server.connection);
+        const strategy = new SqlMigrationStrategy(
+          config.migrate,
+          server.connection,
+        );
         return strategy.run();
       }
       default: {
@@ -119,7 +122,7 @@ class PluginFactory {
     server: Server,
   ): SeedOutput | Promise<SeedOutput> {
     if (!config.seed) {
-      return { results: [], warnings: [] };
+      return { results: [] };
     }
     const strategy = new SeedStrategy(config.seed, server.connection);
     return strategy.run();
@@ -178,17 +181,18 @@ class PluginFactory {
  * **Server setup with migrations:**
  * @example
  * ```ts
+ * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
  * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
  * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const root = dirname(fromFileUrl(import.meta.url));
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
  * const { teardownTests } = await setupTests({
  *   database: {
  *     server: { strategy: ServerStrategy.DOCKER },
- *     migrate: {
- *       strategy: MigrationStrategy.SQL,
- *     },
+ *     migrate: { strategy: MigrationStrategy.SQL, root },
  *   } as PluginConfig,
  * });
  *
@@ -201,17 +205,18 @@ class PluginFactory {
  * **Server setup with migrations and seeding:**
  * @example
  * ```ts
+ * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
  * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
  * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const root = dirname(fromFileUrl(import.meta.url));
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
  * const { teardownTests } = await setupTests({
  *   database: {
  *     server: { strategy: ServerStrategy.DOCKER },
- *     migrate: {
- *       strategy: MigrationStrategy.SQL,
- *     },
+ *     migrate: { strategy: MigrationStrategy.SQL, root },
  *     seed: {
  *       User: [
  *         { email: "email 1", name: "name 1" },
@@ -230,8 +235,11 @@ class PluginFactory {
  * **Migrations and seeding against existing server:**
  * @example
  * ```ts
+ * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
  * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
  * import { postgreSqlPlugin, type PluginConfig, Server, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const root = dirname(fromFileUrl(import.meta.url));
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
@@ -246,9 +254,7 @@ class PluginFactory {
  * const { teardownTests } = await setupTests({
  *   database: {
  *     server,
- *     migrate: {
- *       strategy: MigrationStrategy.SQL,
- *     },
+ *     migrate: { strategy: MigrationStrategy.SQL, root },
  *     seed: {
  *       User: [
  *         { email: "email 1", name: "name 1" },
@@ -318,17 +324,18 @@ export const postgreSqlPlugin = new PluginFactory().create();
  * **Server setup with migrations:**
  * @example
  * ```ts
+ * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
  * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
  * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const root = dirname(fromFileUrl(import.meta.url));
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
  * const { teardownTests } = await setupTests({
  *   database: {
  *     server: { strategy: ServerStrategy.DOCKER },
- *     migrate: {
- *       strategy: MigrationStrategy.SQL,
- *     },
+ *     migrate: { strategy: MigrationStrategy.SQL, root },
  *   } as PluginConfig,
  * });
  *
@@ -341,17 +348,18 @@ export const postgreSqlPlugin = new PluginFactory().create();
  * **Server setup with migrations and seeding:**
  * @example
  * ```ts
+ * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
  * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
  * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const root = dirname(fromFileUrl(import.meta.url));
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
  * const { teardownTests } = await setupTests({
  *   database: {
  *     server: { strategy: ServerStrategy.DOCKER },
- *     migrate: {
- *       strategy: MigrationStrategy.SQL,
- *     },
+ *     migrate: { strategy: MigrationStrategy.SQL, root },
  *     seed: {
  *       User: [
  *         { email: "email 1", name: "name 1" },
@@ -370,8 +378,11 @@ export const postgreSqlPlugin = new PluginFactory().create();
  * **Migrations and seeding against existing server:**
  * @example
  * ```ts
+ * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
  * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
  * import { postgreSqlPlugin, type PluginConfig, Server, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const root = dirname(fromFileUrl(import.meta.url));
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
@@ -386,9 +397,7 @@ export const postgreSqlPlugin = new PluginFactory().create();
  * const { teardownTests } = await setupTests({
  *   database: {
  *     server,
- *     migrate: {
- *       strategy: MigrationStrategy.SQL,
- *     },
+ *     migrate: { strategy: MigrationStrategy.SQL, root },
  *     seed: {
  *       User: [
  *         { email: "email 1", name: "name 1" },
