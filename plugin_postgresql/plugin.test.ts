@@ -5,6 +5,7 @@ import {
   type SetupTestsFn,
   type SetupTestsTeardown,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+import { dirname, fromFileUrl } from "std/path/mod.ts";
 import { assertRejects } from "std/testing/asserts.ts";
 import {
   afterEach,
@@ -16,6 +17,8 @@ import {
 import { MigrationStrategy } from "./migration.ts";
 import { PostgreSqlPlugin, postgreSqlPlugin } from "./plugin.ts";
 import { Server, ServerStrategy } from "./server.ts";
+
+const root = dirname(fromFileUrl(import.meta.url));
 
 describe("postgreSqlPlugin", () => {
   let teardownTests: SetupTestsTeardown;
@@ -74,9 +77,7 @@ describe("postgreSqlPlugin", () => {
           setupTests({
             database: {
               server: result.outputs.database.output.server,
-              migrate: {
-                strategy: unknownStrategy,
-              },
+              migrate: { strategy: unknownStrategy, root },
             },
           }),
         Error,

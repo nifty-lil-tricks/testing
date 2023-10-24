@@ -1,8 +1,8 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { expandGlob } from "std/fs/expand_glob.ts";
-import { basename } from "std/path/mod.ts";
-import { Client } from "x/postgres/client.ts";
+import { expandGlob } from "https://deno.land/std@0.194.0/fs/expand_glob.ts";
+import { basename } from "https://deno.land/std@0.194.0/path/mod.ts";
+import { Client } from "./client.ts";
 import type {
   MigrationOutput,
   MigrationResult,
@@ -13,9 +13,11 @@ import type { Connection } from "./server.ts";
 
 export class SqlMigrationStrategy implements MigrationStrategyContract {
   #connection: Connection;
+  #config: SqlMigrationConfig;
 
-  constructor(connection: Connection) {
+  constructor(config: SqlMigrationConfig, connection: Connection) {
     this.#connection = connection;
+    this.#config = config;
   }
 
   public async run(): Promise<MigrationOutput> {
@@ -33,24 +35,26 @@ export class SqlMigrationStrategy implements MigrationStrategyContract {
   // Merge with the above for readability when the following is fixed:
   // https://github.com/denoland/deno/issues/13781
   async #run(results: MigrationResult[]): Promise<MigrationOutput> {
-    const client = new Client({
-      tls: { enabled: false },
-      ...this.#connection,
-    });
+    const client = new Client(this.#connection);
     await client.connect();
     try {
       const files: string[] = [];
-      for await (const file of expandGlob("**\/migrations\/**\/*.sql")) {
+      for await (
+        const file of expandGlob("**/*.sql", { root: this.#config.root })
+      ) {
         files.push(file.path);
+      }
+      if (files.length === 0) {
+        throw new SqlMigrationError("No SQL files found", []);
       }
       for (const file of files) {
         const query = await Deno.readTextFile(file);
-        const queryResult = await client.queryObject(query);
+        const queryResult = await client.query(query);
         const filename = basename(file);
         results.push({
           name: filename,
           message: `Applied migration: ${filename}`,
-          details: { query: queryResult.query.text },
+          details: { query: queryResult.query },
         });
       }
       return { results };
@@ -88,6 +92,10 @@ export interface SqlMigrationConfig {
    * The SQL strategy. There are no other options for this config.
    */
   strategy: Extract<MigrationStrategy, "SQL">;
+  /**
+   * The SQL root folder to search for SQL files from.
+   */
+  root: string;
   // TODO: add later support by mention as upcoming functionality in the README
   // files?: FunctionOrValue<string | string[]>;
   // orderBy?: MigrationOrderBy;

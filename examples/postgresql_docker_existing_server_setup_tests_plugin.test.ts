@@ -21,6 +21,9 @@ import {
   ServerStrategy,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+import { dirname, fromFileUrl } from "std/path/mod.ts";
+
+const root = dirname(fromFileUrl(import.meta.url));
 
 // In another file, load plugins as follows to generate a setupTests function:
 const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
@@ -50,9 +53,7 @@ describe("Service", () => {
         // Setup existing server using the Docker strategy
         server,
         // Run migrations using the SQL strategy
-        migrate: {
-          strategy: MigrationStrategy.SQL,
-        },
+        migrate: { strategy: MigrationStrategy.SQL, root },
         // Seed the database with data
         seed: {
           User: [

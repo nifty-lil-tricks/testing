@@ -1,7 +1,8 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
 import { parse } from "std/flags/mod.ts";
-import { dirname, fromFileUrl, join } from "std/path/mod.ts";
+import { walk } from "std/fs/walk.ts";
+import { basename, dirname, fromFileUrl, join } from "std/path/mod.ts";
 import { build, BuildOptions, emptyDir } from "x/dnt/mod.ts";
 import { SpecifierMappings } from "x/dnt/transform.ts";
 import { VERSION } from "../version.ts";
@@ -46,6 +47,7 @@ for (const pkg of filteredPackages) {
     outDir: pkg.outDir,
     shims: {
       deno: true,
+      crypto: true,
     },
     rootTestDir: pkg.dir,
     testPattern: "*.test.ts",
@@ -110,7 +112,8 @@ for (const pkg of filteredPackages) {
     typeCheck: false,
     test: false,
   });
-  await adjustPackageJson(pkg, pkg.outDir);
+  await adjustPackageJson(pkg);
+  await adjustFileImports(pkg);
 }
 
 // Cleanup to ensure the uploaded artifacts do not include node_modules
@@ -118,8 +121,8 @@ for (const pkg of packages) {
   await Deno.remove(join(pkg.outDir, "node_modules"), { recursive: true });
 }
 
-async function adjustPackageJson(pkg: Package, outDir: string): Promise<void> {
-  const path = join(outDir, "package.json");
+async function adjustPackageJson(pkg: Package): Promise<void> {
+  const path = join(pkg.outDir, "package.json");
   const rawPackageJson = await Deno.readTextFile(path);
   const packageJson = JSON.parse(rawPackageJson);
   const deps: Record<string, string> = {};
@@ -133,4 +136,34 @@ async function adjustPackageJson(pkg: Package, outDir: string): Promise<void> {
     ...deps,
   };
   await Deno.writeTextFile(path, JSON.stringify(packageJson, null, 2));
+}
+
+async function adjustFileImports(pkg: Package): Promise<void> {
+  const EXTENSIONS = [".mjs", ".js", ".ts", ".md"];
+  for await (
+    const { path } of walk(pkg.outDir, {
+      includeDirs: false,
+      exts: EXTENSIONS,
+    })
+  ) {
+    const contents = await Deno.readTextFile(path);
+    let newContents = contents;
+    ([
+      [
+        '} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts',
+        '} from "@nifty-lil-tricks/testing',
+      ],
+      [
+        `} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/${
+          basename(pkg.dir)
+        }/mod.ts`,
+        `} from "${pkg.name}`,
+      ],
+      ["https://deno.land/std/", ""],
+      [/https:\/\/deno.land\/x\/.+\/mod\.ts/g, "deps"],
+    ] as [string | RegExp, string][]).forEach(([searchValue, replaceValue]) => {
+      newContents = newContents.replaceAll(searchValue, replaceValue);
+    });
+    await Deno.writeTextFile(path, newContents);
+  }
 }

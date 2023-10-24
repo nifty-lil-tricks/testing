@@ -18,6 +18,10 @@ export interface Package {
   mappings?: SpecifierMappings;
 }
 
+const version = parseSemver(VERSION);
+const minMajorVersion = version.major;
+const minMinorVersion = minMajorVersion ? 0 : version.minor;
+
 const partialPackages: Omit<Package, "outDir">[] = [
   {
     name: "@nifty-lil-tricks/testing",
@@ -36,7 +40,7 @@ const partialPackages: Omit<Package, "outDir">[] = [
     mappings: {
       "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts": {
         name: "@nifty-lil-tricks/testing",
-        version: `^${parseSemver(VERSION).major}.0.0`,
+        version: `^${minMajorVersion}.${minMinorVersion}.0`,
       },
     } as SpecifierMappings,
   },

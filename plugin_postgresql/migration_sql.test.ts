@@ -5,15 +5,18 @@ import {
   setupTestsFactory,
   type SetupTestsTeardown,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+import { dirname, fromFileUrl } from "std/path/mod.ts";
 import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
 import { stub } from "std/testing/mock.ts";
-import { Client } from "x/postgres/mod.ts";
+import { Client } from "./client.ts";
 import { MigrationStrategy } from "./migration.ts";
 import { SqlMigrationError } from "./migration_sql.ts";
 import { postgreSqlPlugin } from "./plugin.ts";
 import { ServerStrategy } from "./server.ts";
 
 const ignore = Deno.env.get("IGNORE_DOCKER_TESTS") === "true";
+
+const root = dirname(fromFileUrl(import.meta.url));
 
 // Then one can use this in any test file as follows:
 describe("postgreSqlPlugin", { ignore }, () => {
@@ -45,8 +48,9 @@ describe("postgreSqlPlugin", { ignore }, () => {
               server: { strategy },
               migrate: {
                 strategy: MigrationStrategy.SQL,
+                // Array or async function
+                root,
                 // TODO: add support for customising migrations
-                // files: "migrations/**/*.sql", // Array or async function
                 // orderBy: "FILENAME_DESC", // Optional
               }, // Or just run function
             },
@@ -55,9 +59,9 @@ describe("postgreSqlPlugin", { ignore }, () => {
 
           // Assert
           const { connection } = result.outputs.database.output.server;
-          const client = new Client({ tls: { enabled: false }, ...connection });
+          const client = new Client(connection);
           await client.connect();
-          await client.queryObject(query);
+          await client.query(query);
           await client.end();
         });
 
@@ -70,7 +74,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
           teardownTests = result.teardownTests;
           const clientQueryObjectStub = stub(
             Client.prototype,
-            "queryObject",
+            "query",
             () => {
               throw mockError;
             },
@@ -83,9 +87,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
                 setupTests({
                   database: {
                     server: result.outputs.database.output.server,
-                    migrate: {
-                      strategy: MigrationStrategy.SQL,
-                    },
+                    migrate: { strategy: MigrationStrategy.SQL, root },
                   },
                 }),
               SqlMigrationError,

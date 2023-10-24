@@ -1,7 +1,7 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
 import type { PluginInstance } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
-import { Client } from "x/postgres/client.ts";
+import { Client } from "./client.ts";
 
 /**
  * PostgreSQL Database Server
@@ -36,13 +36,10 @@ export class Server {
    */
   public async init(): Promise<void> {
     let shouldReturn = false;
-    const client = new Client({
-      tls: { enabled: false },
-      ...this.connection,
-    });
     while (shouldReturn === false) {
       // Revert to try/catch/finally block for readability when the following is fixed:
       // https://github.com/denoland/deno/issues/13781
+      const client = new Client(this.connection);
       await client.connect()
         .then(() => shouldReturn = true)
         .catch(() => new Promise((resolve) => setTimeout(resolve, 300)))
