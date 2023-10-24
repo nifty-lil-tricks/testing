@@ -50,18 +50,20 @@ deno task report
 
 ## Release Process
 
-```mermaid
-flowchart TD
-    s(Start)
-    e(End)
-    vb(CI: version bump)
-    pr(Review pull request)
-    cr(Create release)
-    rp(CI: release packages)
+To release a new version, take the following steps:
 
-    s --> vb
-    vb -->|Create PR| pr
-    pr -->|Merge| cr
-    cr -->|Check versions are correct| rp
-    rp --> e
-```
+- Bump the version by running the
+  [`version_bump`](https://github.com/jonnydgreen/nifty-lil-tricks-testing/actions/workflows/version_bump.yml)
+  GitHub Action and choose the appropriate version bump:
+
+![version-bump](docs/img/version-bump.png)
+
+- Wait for the Pull Request to be created and merge this into main.
+
+- Wait for the
+  [`main` branch action](https://github.com/jonnydgreen/nifty-lil-tricks-testing/actions?query=branch%3Amain)
+  to complete.
+
+- Find the created
+  [draft release](https://github.com/jonnydgreen/nifty-lil-tricks-testing/releases)
+  and publish it.
