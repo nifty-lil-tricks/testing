@@ -1,3 +1,11 @@
+### 0.4.0 / 2023.10.26
+
+- Add extra coverage
+- Add extra options and database creation support
+- Add extra options and database creation support (#17)
+- Update release process docs
+- Update release process docs (#15)
+
 ### 0.3.0 / 2023.10.24
 
 - Fix issues with client
