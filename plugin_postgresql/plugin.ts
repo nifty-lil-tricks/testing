@@ -4,7 +4,13 @@ import {
   assertNever,
   type Plugin,
   type PluginInstance,
+  type SetupTestsTeardown,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+import {
+  DatabaseConfig,
+  DatabaseOutput,
+  DatabaseStrategy,
+} from "./database.ts";
 import {
   type MigrationConfig,
   type MigrationOutput,
@@ -35,16 +41,32 @@ class PluginFactory {
     } else {
       setup = await this.#setupNewDatabaseServer(config.server);
     }
-    const { output: server, teardown } = setup;
-    await server.init();
+    const { teardown } = setup;
+    await setup.output.init();
+
+    const { server, teardown: teardownDatabase } = await this
+      .#shouldRunDatabaseCreation(
+        config,
+        setup.output,
+      );
 
     return {
-      teardown,
+      teardown: this.#buildTeardown([teardownDatabase, teardown]),
       output: {
         server,
         migrate: await this.#shouldRunMigration(config, server),
         seed: await this.#shouldRunSeed(config, server),
       },
+    };
+  }
+
+  #buildTeardown(
+    teardowns: PluginInstance<Server>["teardown"][],
+  ): SetupTestsTeardown {
+    return async () => {
+      for (const teardown of teardowns) {
+        await teardown();
+      }
     };
   }
 
@@ -91,6 +113,17 @@ class PluginFactory {
         );
       }
     }
+  }
+
+  #shouldRunDatabaseCreation(
+    config: PluginConfig,
+    server: Server,
+  ): DatabaseOutput | Promise<DatabaseOutput> {
+    if (!config.database) {
+      return { server, teardown: () => Promise.resolve() };
+    }
+    const strategy = new DatabaseStrategy(config.database, server);
+    return strategy.run();
   }
 
   #shouldRunMigration(
@@ -169,7 +202,7 @@ class PluginFactory {
  *   database: "database",
  * });
  * const { teardownTests } = await setupTests({
- *   database: { server },
+ *   database: { server } as PluginConfig,
  * });
  *
  * // Do work
@@ -216,6 +249,37 @@ class PluginFactory {
  * const { teardownTests } = await setupTests({
  *   database: {
  *     server: { strategy: ServerStrategy.DOCKER },
+ *     migrate: { strategy: MigrationStrategy.SQL, root },
+ *     seed: {
+ *       User: [
+ *         { email: "email 1", name: "name 1" },
+ *         { email: "email 2", name: "name 2" },
+ *       ],
+ *     },
+ *   } as PluginConfig,
+ * });
+ *
+ * // Do work
+ *
+ * // Teardown when finished
+ * await teardownTests();
+ * ```
+ *
+ * **Server setup with custom database, migrations and seeding:**
+ * @example
+ * ```ts
+ * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const root = dirname(fromFileUrl(import.meta.url));
+ *
+ * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
+ *
+ * const { teardownTests } = await setupTests({
+ *   database: {
+ *     server: { strategy: ServerStrategy.DOCKER },
+ *     database: { prefix: "custom" },
  *     migrate: { strategy: MigrationStrategy.SQL, root },
  *     seed: {
  *       User: [
@@ -312,7 +376,7 @@ export const postgreSqlPlugin = new PluginFactory().create();
  *   database: "database",
  * });
  * const { teardownTests } = await setupTests({
- *   database: { server },
+ *   database: { server } as PluginConfig,
  * });
  *
  * // Do work
@@ -375,6 +439,37 @@ export const postgreSqlPlugin = new PluginFactory().create();
  * await teardownTests();
  * ```
  *
+ * **Server setup with custom database, migrations and seeding:**
+ * @example
+ * ```ts
+ * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ *
+ * const root = dirname(fromFileUrl(import.meta.url));
+ *
+ * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
+ *
+ * const { teardownTests } = await setupTests({
+ *   database: {
+ *     server: { strategy: ServerStrategy.DOCKER },
+ *     database: { prefix: "custom" },
+ *     migrate: { strategy: MigrationStrategy.SQL, root },
+ *     seed: {
+ *       User: [
+ *         { email: "email 1", name: "name 1" },
+ *         { email: "email 2", name: "name 2" },
+ *       ],
+ *     },
+ *   } as PluginConfig,
+ * });
+ *
+ * // Do work
+ *
+ * // Teardown when finished
+ * await teardownTests();
+ * ```
+ *
  * **Migrations and seeding against existing server:**
  * @example
  * ```ts
@@ -418,10 +513,17 @@ export interface PluginConfig {
    * The Database Server config.
    */
   server: ServerConfig | Server;
+
+  /**
+   * The Database config for the database creation. If not specified, no database will be created.
+   */
+  database?: DatabaseConfig;
+
   /**
    * The Database Migration config. If not specified, no migrations will be run.
    */
   migrate?: MigrationConfig;
+
   /**
    * The Database Seed config. If not specified, no seeding will be done.
    */

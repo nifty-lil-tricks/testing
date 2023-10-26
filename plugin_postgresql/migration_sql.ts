@@ -3,11 +3,12 @@
 import { expandGlob } from "https://deno.land/std@0.194.0/fs/expand_glob.ts";
 import { basename } from "https://deno.land/std@0.194.0/path/mod.ts";
 import { Client } from "./client.ts";
-import type {
-  MigrationOutput,
-  MigrationResult,
-  MigrationStrategy,
-  MigrationStrategyContract,
+import {
+  MigrationOrderBy,
+  type MigrationOutput,
+  type MigrationResult,
+  type MigrationStrategy,
+  type MigrationStrategyContract,
 } from "./migration.ts";
 import type { Connection } from "./server.ts";
 
@@ -38,12 +39,7 @@ export class SqlMigrationStrategy implements MigrationStrategyContract {
     const client = new Client(this.#connection);
     await client.connect();
     try {
-      const files: string[] = [];
-      for await (
-        const file of expandGlob("**/*.sql", { root: this.#config.root })
-      ) {
-        files.push(file.path);
-      }
+      const files = await this.#files();
       if (files.length === 0) {
         throw new SqlMigrationError("No SQL files found", []);
       }
@@ -61,6 +57,30 @@ export class SqlMigrationStrategy implements MigrationStrategyContract {
     } finally {
       await client.end();
     }
+  }
+
+  async #files(): Promise<string[]> {
+    if (typeof this.#config.files === "function") {
+      return this.#config.files();
+    }
+
+    const files: string[] = [];
+    for await (
+      const file of expandGlob(this.#config.files || "**/*.sql", {
+        root: this.#config.root,
+      })
+    ) {
+      files.push(file.path);
+    }
+    return files.sort((a, b) => {
+      switch (this.#config.orderBy) {
+        case MigrationOrderBy.FILENAME_DESC:
+          return b.localeCompare(a);
+        default:
+          // Default: ASC
+          return a.localeCompare(b);
+      }
+    });
   }
 }
 
@@ -94,9 +114,20 @@ export interface SqlMigrationConfig {
   strategy: Extract<MigrationStrategy, "SQL">;
   /**
    * The SQL root folder to search for SQL files from.
+   *
+   * @default CWD
    */
-  root: string;
-  // TODO: add later support by mention as upcoming functionality in the README
-  // files?: FunctionOrValue<string | string[]>;
-  // orderBy?: MigrationOrderBy;
+  root?: string;
+  /**
+   * The files glob to search for SQL files from.
+   *
+   * @default "**\x/*.sql"
+   */
+  files?: string | (() => Promise<string[]>) | (() => string[]);
+  /**
+   * The order in which to process the files
+   *
+   * @default "FILENAME_ASC"
+   */
+  orderBy?: MigrationOrderBy;
 }

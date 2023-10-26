@@ -5,13 +5,14 @@ import {
   setupTestsFactory,
   type SetupTestsTeardown,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
-import { dirname, fromFileUrl } from "std/path/mod.ts";
+import { expandGlob } from "std/fs/expand_glob.ts";
+import { dirname, fromFileUrl, join } from "std/path/mod.ts";
 import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
 import { stub } from "std/testing/mock.ts";
 import { Client } from "./client.ts";
-import { MigrationStrategy } from "./migration.ts";
+import { MigrationOrderBy, MigrationStrategy } from "./migration.ts";
 import { SqlMigrationError } from "./migration_sql.ts";
-import { postgreSqlPlugin } from "./plugin.ts";
+import { PluginConfig, postgreSqlPlugin } from "./plugin.ts";
 import { ServerStrategy } from "./server.ts";
 
 const ignore = Deno.env.get("IGNORE_DOCKER_TESTS") === "true";
@@ -38,38 +39,81 @@ describe("postgreSqlPlugin", { ignore }, () => {
   describe(`with ${strategy} strategy`, () => {
     describe("setupTests", () => {
       describe(`with ${MigrationStrategy.SQL} migration strategy`, () => {
-        it("should setup tests by running defined migrations against PostgreSQL database server", async () => {
-          // Arrange
-          const query = `SELECT id, title, content, published FROM "Post";`;
-
-          // Act
-          const result = await setupTests({
-            database: {
-              server: { strategy },
-              migrate: {
-                strategy: MigrationStrategy.SQL,
-                // Array or async function
-                root,
-                // TODO: add support for customising migrations
-                // orderBy: "FILENAME_DESC", // Optional
-              }, // Or just run function
+        [
+          {
+            name: "should correctly run migrations using the default values",
+            query: `SELECT id, title, content, published FROM "Post";`,
+            root: join(root, "fixtures/migrations"),
+          },
+          {
+            name:
+              "should correctly run migrations using the files defined by a glob",
+            query: `SELECT id, title, content, published FROM "Post";`,
+            files: "fixtures/migrations-up-down/**/migration.sql",
+            root,
+          },
+          {
+            name:
+              "should correctly run migrations using the files defined by a function",
+            query: `SELECT id, title, content, published FROM "Post";`,
+            files: async () => {
+              const files = [];
+              for await (
+                const file of expandGlob(
+                  "fixtures/migrations-up-down/**/migration.sql",
+                  { root },
+                )
+              ) {
+                files.push(file.path);
+              }
+              return files;
             },
-          });
-          teardownTests = result.teardownTests;
+          },
+          {
+            name:
+              "should correctly run migrations when ordering files by filename descending",
+            query: `SELECT id, title, content, published FROM "Post";`,
+            root: join(root, "fixtures/migrations-desc"),
+            orderBy: MigrationOrderBy.FILENAME_DESC,
+          },
+          {
+            name:
+              "should correctly run migrations when ordering files by filename ascending",
+            query: `SELECT id, title, content, published FROM "Post";`,
+            root: join(root, "fixtures/migrations-asc"),
+            orderBy: MigrationOrderBy.FILENAME_ASC,
+          },
+        ].forEach(({ name, query, root, files, orderBy }) => {
+          it(name, async () => {
+            // Act
+            const result = await setupTests({
+              database: {
+                server: { strategy },
+                migrate: {
+                  strategy: MigrationStrategy.SQL,
+                  // Array or async function
+                  root,
+                  files,
+                  orderBy,
+                },
+              } as PluginConfig,
+            });
+            teardownTests = result.teardownTests;
 
-          // Assert
-          const { connection } = result.outputs.database.output.server;
-          const client = new Client(connection);
-          await client.connect();
-          await client.query(query);
-          await client.end();
+            // Assert
+            const { connection } = result.outputs.database.output.server;
+            const client = new Client(connection);
+            await client.connect();
+            await client.query(query);
+            await client.end();
+          });
         });
 
         it("should error if the migrations fail", async () => {
           // Arrange
           const mockError = new Error("kaboom");
           const result = await setupTests({
-            database: { server: { strategy } },
+            database: { server: { strategy } } as PluginConfig,
           });
           teardownTests = result.teardownTests;
           const clientQueryObjectStub = stub(
@@ -88,7 +132,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
                   database: {
                     server: result.outputs.database.output.server,
                     migrate: { strategy: MigrationStrategy.SQL, root },
-                  },
+                  } as PluginConfig,
                 }),
               SqlMigrationError,
               `Unable to run migrations: ${mockError.message}`,
@@ -96,6 +140,30 @@ describe("postgreSqlPlugin", { ignore }, () => {
           } finally {
             clientQueryObjectStub.restore();
           }
+        });
+
+        it("should error if no migrations are found", async () => {
+          // Arrange
+          const result = await setupTests({
+            database: { server: { strategy } } as PluginConfig,
+          });
+          teardownTests = result.teardownTests;
+
+          // Act & Assert
+          await assertRejects(
+            () =>
+              setupTests({
+                database: {
+                  server: result.outputs.database.output.server,
+                  migrate: {
+                    strategy: MigrationStrategy.SQL,
+                    root: join(root, "fixtures/empty-migrations"),
+                  },
+                } as PluginConfig,
+              }),
+            SqlMigrationError,
+            "Unable to run migrations: No SQL files found",
+          );
         });
       });
     });

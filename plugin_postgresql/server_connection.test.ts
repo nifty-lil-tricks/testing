@@ -7,7 +7,7 @@ import {
 import { assertEquals } from "std/testing/asserts.ts";
 import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
 import { type Stub, stub } from "std/testing/mock.ts";
-import { postgreSqlPlugin } from "./plugin.ts";
+import { PluginConfig, postgreSqlPlugin } from "./plugin.ts";
 import { Server } from "./server.ts";
 
 // Then one can use this in any test file as follows:
@@ -46,7 +46,7 @@ describe("postgreSqlPlugin", () => {
         const result = await setupTests({
           database: {
             server,
-          },
+          } as PluginConfig,
         });
         teardownTests = result.teardownTests;
 
@@ -62,7 +62,7 @@ describe("postgreSqlPlugin", () => {
         const result = await setupTests({
           database: {
             server,
-          },
+          } as PluginConfig,
         });
         teardownTests = result.teardownTests;
 

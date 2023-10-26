@@ -60,6 +60,10 @@ export const MigrationOrderBy = {
    * Order migrations by the filename descending.
    */
   FILENAME_DESC: "FILENAME_DESC",
+  /**
+   * Order migrations by the filename ascending.
+   */
+  FILENAME_ASC: "FILENAME_ASC",
 } as const;
 export type MigrationOrderBy =
   typeof MigrationOrderBy[keyof typeof MigrationOrderBy];
