@@ -21,7 +21,11 @@ import {
 } from "std/testing/mock.ts";
 import { getAvailablePort } from "x/port/mod.ts";
 import { Client } from "./client.ts";
-import { type PostgreSqlPlugin, postgreSqlPlugin } from "./plugin.ts";
+import {
+  PluginConfig,
+  type PostgreSqlPlugin,
+  postgreSqlPlugin,
+} from "./plugin.ts";
 import { ServerStrategy } from "./server.ts";
 import { DockerServerError } from "./server_docker.ts";
 import { DenoCommand } from "./utils.ts";
@@ -64,7 +68,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
             server: {
               strategy,
             },
-          },
+          } as PluginConfig,
         });
         teardownTests = result.teardownTests;
 
@@ -124,7 +128,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
         // Act
         try {
           const result = await setupTests({
-            database: { server: { strategy } },
+            database: { server: { strategy } } as PluginConfig,
           });
           teardownTests = result.teardownTests;
 
@@ -146,7 +150,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
 
         // Act
         const result = await setupTests({
-          database: { server: { strategy, port } },
+          database: { server: { strategy, port } } as PluginConfig,
         });
         teardownTests = result.teardownTests;
 
@@ -171,7 +175,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
             setupTests({
               database: {
                 server: { strategy },
-              },
+              } as PluginConfig,
             })
           );
         } finally {
@@ -208,7 +212,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
               setupTests({
                 database: {
                   server: { strategy },
-                },
+                } as PluginConfig,
               }),
             DockerServerError,
             "PostgreSQL Docker server is not exposed on a valid port: undefined",
@@ -243,7 +247,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
               setupTests({
                 database: {
                   server: { strategy },
-                },
+                } as PluginConfig,
               }),
             DockerServerError,
             `Error starting PostgreSQL database server (exit code: ${mockExitCode}): ${mockStderr}`,
@@ -288,7 +292,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
               setupTests({
                 database: {
                   server: { strategy },
-                },
+                } as PluginConfig,
               }),
             DockerServerError,
             `Error inspecting PostgreSQL database server (exit code: ${mockExitCode}): ${mockStderr}`,
@@ -327,7 +331,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
               setupTests({
                 database: {
                   server: { strategy },
-                },
+                } as PluginConfig,
               }),
             DockerServerError,
             "PostgreSQL Docker server is not exposed on a valid hostname: undefined",
@@ -346,7 +350,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
         const result = await setupTests({
           database: {
             server: { strategy },
-          },
+          } as PluginConfig,
         });
         teardownTests = result.teardownTests;
 
@@ -375,7 +379,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
         const result = await setupTests({
           database: {
             server: { strategy },
-          },
+          } as PluginConfig,
         });
         teardownTests = result.teardownTests;
         const denoCommandOutputStub = stub(

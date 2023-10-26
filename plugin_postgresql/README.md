@@ -29,10 +29,11 @@ npm install @nifty-lil-tricks/testing-plugin-postgresql
 
 The following features are supported
 
-- Setup a Postgresql server in [Docker](https://www.docker.com/) for testing.
-- Setup an existing Postgresql server for testing.
-- Run migrations on the configured Postgresql server.
-- Seed the configured Postgresql server with data.
+- Setup a PostgreSQL server in [Docker](https://www.docker.com/) for testing.
+- Setup an existing PostgreSQL server for testing.
+- Setup custom database on the PostgreSQL server
+- Run migrations on the configured PostgreSQL server
+- Seed the configured PostgreSQL server with data.
 
 ### Quick start
 
@@ -217,6 +218,187 @@ describe("Service", () => {
   });
 });
 ```
+
+### Migrations customisation
+
+#### Custom files glob
+
+By default, the migrations look for files using the following glob:
+`"**/*.sql"`. This can be overridden by defining a `string` or `function`
+returning a list of strings. For example:
+
+```typescript
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  it,
+} from "https://deno.land/std/testing/bdd.ts";
+import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
+import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+import {
+  setupTestsFactory,
+  type SetupTestsTeardown,
+} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+import {
+  MigrationStrategy,
+  type PluginConfig,
+  postgreSqlPlugin,
+  Server,
+  ServerStrategy,
+} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+
+const root = dirname(fromFileUrl(import.meta.url));
+
+// In another file, load plugins as follows to generate a setupTests function:
+const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
+
+// Then one can use this in any test file as follows:
+describe("Service", () => {
+  let teardownTests: SetupTestsTeardown;
+  let server: Server;
+
+  beforeEach(async () => {
+    // Setup tests with configured plugins
+    const result = await setupTests({
+      database: {
+        // Setup server using the Docker strategy
+        server: { strategy: ServerStrategy.DOCKER },
+        // Run migrations using the SQL strategy
+        migrate: {
+          strategy: MigrationStrategy.SQL,
+          root,
+          files: "fixtures/migrations/**/migration.sql",
+        },
+        // Seed the database with data
+        seed: {
+          User: [
+            { email: "email 1", name: "name 1" },
+            { email: "email 2", name: "name 2" },
+          ],
+        },
+      } as PluginConfig,
+    });
+    teardownTests = result.teardownTests;
+    server = result.outputs.database.output.server;
+  });
+
+  afterEach(async () => {
+    // Teardown tests to restore environment after tests have run
+    await teardownTests();
+  });
+
+  describe("method", () => {
+    it("should test something that relies on the postgresql plugin", async () => {
+      // Arrange
+      const query = `SELECT email, name FROM "User";`;
+      const { connection } = server;
+      const client = new Client({ tls: { enabled: false }, ...connection });
+      await client.connect();
+
+      // Act
+      const queryOutput = await client.queryObject(query);
+      await client.end();
+
+      // Assert
+      assertEquals(queryOutput.rowCount, 2);
+    });
+  });
+});
+```
+
+#### Custom files ordering
+
+By default, the migrations process the files in ascending order by filename.
+This can be overridden with the `orderBy` option. For example:
+
+```typescript
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  it,
+} from "https://deno.land/std/testing/bdd.ts";
+import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
+import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+import {
+  setupTestsFactory,
+  type SetupTestsTeardown,
+} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+import {
+  MigrationOrderBy,
+  MigrationStrategy,
+  type PluginConfig,
+  postgreSqlPlugin,
+  Server,
+  ServerStrategy,
+} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+
+const root = dirname(fromFileUrl(import.meta.url));
+
+// In another file, load plugins as follows to generate a setupTests function:
+const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
+
+// Then one can use this in any test file as follows:
+describe("Service", () => {
+  let teardownTests: SetupTestsTeardown;
+  let server: Server;
+
+  beforeEach(async () => {
+    // Setup tests with configured plugins
+    const result = await setupTests({
+      database: {
+        // Setup server using the Docker strategy
+        server: { strategy: ServerStrategy.DOCKER },
+        // Run migrations using the SQL strategy
+        migrate: {
+          strategy: MigrationStrategy.SQL,
+          root,
+          orderBy: MigrationOrderBy.FILENAME_DESC,
+        },
+        // Seed the database with data
+        seed: {
+          User: [
+            { email: "email 1", name: "name 1" },
+            { email: "email 2", name: "name 2" },
+          ],
+        },
+      } as PluginConfig,
+    });
+    teardownTests = result.teardownTests;
+    server = result.outputs.database.output.server;
+  });
+
+  afterEach(async () => {
+    // Teardown tests to restore environment after tests have run
+    await teardownTests();
+  });
+
+  describe("method", () => {
+    it("should test something that relies on the postgresql plugin", async () => {
+      // Arrange
+      const query = `SELECT email, name FROM "User";`;
+      const { connection } = server;
+      const client = new Client({ tls: { enabled: false }, ...connection });
+      await client.connect();
+
+      // Act
+      const queryOutput = await client.queryObject(query);
+      await client.end();
+
+      // Assert
+      assertEquals(queryOutput.rowCount, 2);
+    });
+  });
+});
+```
+
+### API
+
+The API Docs can be found
+[here](https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts).
 
 ## Examples
 

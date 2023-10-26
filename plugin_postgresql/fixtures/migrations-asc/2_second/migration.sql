@@ -1,0 +1,3 @@
+-- UpdateTable
+
+ALTER TABLE "Post" ADD COLUMN "title" VARCHAR(255) NOT NULL;

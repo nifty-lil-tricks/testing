@@ -36,6 +36,8 @@ describe("Service", () => {
       database: {
         // Setup server using the Docker strategy
         server: { strategy: ServerStrategy.DOCKER },
+        // Create a custom database for this test run
+        database: { prefix: "custom" },
         // Run migrations using the SQL strategy
         migrate: { strategy: MigrationStrategy.SQL, root },
         // Seed the database with data

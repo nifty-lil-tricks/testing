@@ -5,7 +5,7 @@ import {
   type SetupTestsFn,
   type SetupTestsTeardown,
 } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
-import { dirname, fromFileUrl } from "std/path/mod.ts";
+import { dirname, fromFileUrl, join } from "std/path/mod.ts";
 import { assertRejects } from "std/testing/asserts.ts";
 import {
   afterEach,
@@ -15,10 +15,10 @@ import {
   it,
 } from "std/testing/bdd.ts";
 import { MigrationStrategy } from "./migration.ts";
-import { PostgreSqlPlugin, postgreSqlPlugin } from "./plugin.ts";
+import { PluginConfig, PostgreSqlPlugin, postgreSqlPlugin } from "./plugin.ts";
 import { Server, ServerStrategy } from "./server.ts";
 
-const root = dirname(fromFileUrl(import.meta.url));
+const root = join(dirname(fromFileUrl(import.meta.url)), "fixtures/migrations");
 
 describe("postgreSqlPlugin", () => {
   let teardownTests: SetupTestsTeardown;
@@ -51,7 +51,7 @@ describe("postgreSqlPlugin", () => {
             server: {
               strategy: "unknown" as unknown as ServerStrategy,
             },
-          },
+          } as PluginConfig,
         })
       );
     });
@@ -67,7 +67,7 @@ describe("postgreSqlPlugin", () => {
         database: "database",
       });
       server.init = () => Promise.resolve();
-      const result = await setupTests({ database: { server } });
+      const result = await setupTests({ database: { server } as PluginConfig });
       teardownTests = result.teardownTests;
       const unknownStrategy = "unknown" as MigrationStrategy;
 
@@ -78,7 +78,7 @@ describe("postgreSqlPlugin", () => {
             database: {
               server: result.outputs.database.output.server,
               migrate: { strategy: unknownStrategy, root },
-            },
+            } as PluginConfig,
           }),
         Error,
         `Unknown migration strategy: ${unknownStrategy}`,
