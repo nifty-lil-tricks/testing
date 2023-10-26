@@ -1,3 +1,8 @@
+### 0.3.1 / 2023.10.26
+
+- Update release process docs
+- Update release process docs (#15)
+
 ### 0.3.0 / 2023.10.24
 
 - Fix issues with client
