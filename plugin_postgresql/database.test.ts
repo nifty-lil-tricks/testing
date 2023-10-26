@@ -7,6 +7,7 @@ import {
 import { dirname, fromFileUrl, join } from "std/path/mod.ts";
 import { assert, assertEquals } from "std/testing/asserts.ts";
 import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";
+import { stub } from "std/testing/mock.ts";
 import { Client } from "./client.ts";
 import { MigrationStrategy } from "./migration.ts";
 import { PluginConfig, postgreSqlPlugin } from "./plugin.ts";
@@ -127,7 +128,7 @@ describe("postgreSqlPlugin", { ignore }, () => {
     });
 
     describe("teardownTests", () => {
-      it("should setup tests in a custom database for an existing server", async () => {
+      it("should teardown tests in a custom database for an existing server", async () => {
         // Arrange
         const query = `SELECT datname FROM pg_database;`;
         const prefix = "custom";
@@ -201,6 +202,35 @@ describe("postgreSqlPlugin", { ignore }, () => {
           } finally {
             await client.end();
           }
+        }
+      });
+
+      it("should no-op any errors in teardown tests in a custom database", async () => {
+        // Arrange
+        const prefix = "custom";
+        const result = await setupTests({
+          database: {
+            server: { strategy },
+            database: { prefix },
+            migrate: {
+              strategy: MigrationStrategy.SQL,
+              root,
+            },
+          } as PluginConfig,
+        });
+        teardownTests = result.teardownTests;
+
+        const clientConnectStub = stub(
+          Client.prototype,
+          "connect",
+          () => Promise.reject(new Error("kaboom")),
+        );
+
+        try {
+          // Act & Assert
+          await teardownTests();
+        } finally {
+          clientConnectStub.restore();
         }
       });
     });
