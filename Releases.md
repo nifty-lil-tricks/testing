@@ -1,3 +1,7 @@
+### 0.4.1 / 2023.10.27
+
+- Refine releases file (#20)
+
 ### 0.4.0 / 2023.10.26
 
 - Add extra options and database creation support (#17)
