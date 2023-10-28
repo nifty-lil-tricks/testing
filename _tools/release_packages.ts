@@ -38,7 +38,21 @@ const partialPackages: Omit<Package, "outDir">[] = [
     tags: ["postgresql"],
     test: false,
     mappings: {
-      "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts": {
+      "https://deno.land/x/nifty_lil_tricks_testing/mod.ts": {
+        name: "@nifty-lil-tricks/testing",
+        version: `^${minMajorVersion}.${minMinorVersion}.0`,
+      },
+    } as SpecifierMappings,
+  },
+  {
+    name: "@nifty-lil-tricks/testing-plugin-nestjs",
+    description:
+      "A nifty li'l plugin for setting up NestJS applications when testing",
+    dir: join(rootDir, "plugin_nestjs"),
+    tags: ["nestjs"],
+    test: true,
+    mappings: {
+      "https://deno.land/x/nifty_lil_tricks_testing/mod.ts": {
         name: "@nifty-lil-tricks/testing",
         version: `^${minMajorVersion}.${minMinorVersion}.0`,
       },

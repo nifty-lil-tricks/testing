@@ -13,10 +13,11 @@ A selection of useful utilities (or nifty li'l tricks!) for all things testing.
 
 The following plugins are available:
 
-| Plugin                                                                                                      | Description                                                                                                                                                                                                                                                                                                                                                                                 | Status             | Npm                                                                                                                                                                                        | Docs                                                                                                   |
-| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| [PostgreSQl](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_postgresql/README.md) | Setup the World's Most Advanced Open Source Relational Database for testing. It has the following features: <br><ul><li>Setup a Postgresql server in [Docker](https://www.docker.com/) for testing.</li><li>Setup an existing Postgresql server for testing.</li><li>Run migrations on the configured Postgresql server.</li><li>Seed the configured Postgresql server with data.</li></ul> | :white_check_mark: | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-postgresql?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-postgresql) | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_postgresql/README.md). |
-| [NestJS Server](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_nestjs/README.md)  | Setup a progressive Node.js framework for building efficient, reliable and scalable server-side applications for testing.                                                                                                                                                                                                                                                                   | :construction:     | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-nestjs?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-nestjs)         | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_nestjs/README.md)      |
+| Plugin                                                                                                       | Description                                                                                                                                                                                                                                                                                                                                                                                 | Status | Npm                                                                                                                                                                                        | Docs                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| [PostgreSQl](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_postgresql/README.md)  | Setup the World's Most Advanced Open Source Relational Database for testing. It has the following features: <br><ul><li>Setup a Postgresql server in [Docker](https://www.docker.com/) for testing.</li><li>Setup an existing Postgresql server for testing.</li><li>Run migrations on the configured Postgresql server.</li><li>Seed the configured Postgresql server with data.</li></ul> | ✅     | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-postgresql?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-postgresql) | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_postgresql/README.md). |
+| [NestJS Server](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_nestjs/README.md)   | Setup a progressive Node.js framework for building efficient, reliable and scalable server-side applications for testing.                                                                                                                                                                                                                                                                   | ✅     | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-nestjs?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-nestjs)         | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_nestjs/README.md)      |
+| [Express Server](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_express/README.md) | Setup a minimal and flexible Node.js web Express application for testing.                                                                                                                                                                                                                                                                                                                   | 🚧     | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-nestjs?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-nestjs)         | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_nestjs/README.md)      |
 
 ## Installation
 
@@ -25,7 +26,7 @@ The following plugins are available:
 ### Deno
 
 ```typescript
-import * as testing from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+import * as testing from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 ```
 
 ### Node.js
@@ -62,7 +63,7 @@ import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 
 // Define or import a plugin as follows:
 const helloWorldPlugin = {
@@ -131,7 +132,7 @@ An example of a plugin is as follows:
 ```typescript
 import {
   type Plugin,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 
 interface HelloWorldConfig {
   message: string;
@@ -169,7 +170,7 @@ plugin invocation. The data will be namespaced to the plugin name. For example:
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 
 // Define or import a plugin as follows:
 const helloWorldPlugin = {
@@ -216,7 +217,7 @@ For example:
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 
 // Define or import a plugin as follows:
 const helloWorldPlugin = {

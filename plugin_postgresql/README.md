@@ -16,7 +16,7 @@ A nifty li'l plugin for setting up PostgreSQL database instances when testing
 ### Deno
 
 ```typescript
-import { postgreSqlPlugin } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+import { postgreSqlPlugin } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
 ```
 
 ### Node.js
@@ -53,14 +53,14 @@ import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 import {
   MigrationStrategy,
   type PluginConfig,
   postgreSqlPlugin,
   Server,
   ServerStrategy,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
 
 const root = dirname(fromFileUrl(import.meta.url));
 
@@ -138,14 +138,14 @@ import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 import {
   MigrationStrategy,
   type PluginConfig,
   postgreSqlPlugin,
   Server,
   ServerStrategy,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
 
 const root = dirname(fromFileUrl(import.meta.url));
 
@@ -240,14 +240,14 @@ import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 import {
   MigrationStrategy,
   type PluginConfig,
   postgreSqlPlugin,
   Server,
   ServerStrategy,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
 
 const root = dirname(fromFileUrl(import.meta.url));
 
@@ -326,7 +326,7 @@ import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 import {
   MigrationOrderBy,
   MigrationStrategy,
@@ -334,7 +334,7 @@ import {
   postgreSqlPlugin,
   Server,
   ServerStrategy,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
 
 const root = dirname(fromFileUrl(import.meta.url));
 

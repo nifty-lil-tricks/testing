@@ -23,7 +23,7 @@ import {
  *  - `teardown`
  *
  * ```typescript
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
  *
  * const helloWorldPlugin = {
  *   setup: (config: { message: string }) => {

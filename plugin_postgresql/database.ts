@@ -1,6 +1,6 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { SetupTestsTeardown } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+import { SetupTestsTeardown } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 import { Client } from "./client.ts";
 import { Server } from "./server.ts";
 

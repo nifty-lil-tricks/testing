@@ -10,7 +10,7 @@ import {
 import {
   setupTestsFactory,
   SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 
 // Define or import a plugin as follows:
 const helloWorldPlugin = {

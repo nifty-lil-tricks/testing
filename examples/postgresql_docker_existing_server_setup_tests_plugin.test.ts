@@ -12,14 +12,14 @@ import {
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 import {
   MigrationStrategy,
   type PluginConfig,
   postgreSqlPlugin,
   Server,
   ServerStrategy,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 import { dirname, fromFileUrl } from "std/path/mod.ts";
 

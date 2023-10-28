@@ -50,7 +50,7 @@ function checkImportStatements(
     const importPath = (moduleSpecifier as StringLiteral).text;
     const isRelative = importPath.startsWith(".");
     const isInternal = importPath.startsWith(
-      "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/",
+      "https://deno.land/x/nifty_lil_tricks_testing/",
     );
     const isAllowedExternalDep = importPath.startsWith(
       "https://deno.land/x/postgres@v0.17.0/",

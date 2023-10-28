@@ -6,6 +6,6 @@
     "x/dnt/": "https://deno.land/x/dnt@0.34.0/",
     "x/port/": "https://deno.land/x/port@1.0.0/",
     "typescript": "npm:typescript@5.0.2",
-    "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/": "./"
+    "https://deno.land/x/nifty_lil_tricks_testing/": "./"
   }
 }
