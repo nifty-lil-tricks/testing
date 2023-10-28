@@ -11,6 +11,7 @@ import {
   INestApplication,
   Type,
 } from "npm:@nestjs/common@^10.2.7";
+import { ExpressAdapter } from "npm:@nestjs/platform-express@^10.2.7";
 import {
   OverrideByFactoryOptions,
   Test,
@@ -42,7 +43,7 @@ class PluginFactory {
 
     // Create application and listen on an available port
     const module = await baseModule.compile();
-    const app = module.createNestApplication({
+    const app = module.createNestApplication(new ExpressAdapter(), {
       logger: false,
       forceCloseConnections: true,
     });
