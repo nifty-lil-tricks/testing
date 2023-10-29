@@ -47,8 +47,7 @@ for (const pkg of filteredPackages) {
     outDir: pkg.outDir,
     shims: {
       deno: true,
-      // TODO: make configurable
-      crypto: true,
+      ...pkg.shims,
     },
     rootTestDir: pkg.dir,
     testPattern: "*.test.ts",

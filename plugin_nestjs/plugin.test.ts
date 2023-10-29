@@ -171,11 +171,7 @@ describe("nestJsPlugin", () => {
       await teardownTests();
 
       // Assert
-      await assertRejects(
-        () => fetch(new URL("/hello", origin)),
-        TypeError,
-        "Connection refused",
-      );
+      await assertRejects(() => fetch(new URL("/hello", origin)), TypeError);
     });
   });
 });

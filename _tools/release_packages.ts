@@ -2,6 +2,7 @@
 
 import { dirname, fromFileUrl, join } from "std/path/mod.ts";
 import { parse as parseSemver } from "std/semver/mod.ts";
+import { ShimOptions } from "x/dnt/mod.ts";
 import { SpecifierMappings } from "x/dnt/transform.ts";
 import { VERSION } from "../version.ts";
 
@@ -14,6 +15,7 @@ export interface Package {
   dir: string;
   outDir: string;
   tags: string[];
+  shims?: ShimOptions;
   test?: boolean;
   mappings?: SpecifierMappings;
 }
@@ -37,6 +39,7 @@ const partialPackages: Omit<Package, "outDir">[] = [
     dir: join(rootDir, "plugin_postgresql"),
     tags: ["postgresql"],
     test: false,
+    shims: { crypto: true },
     mappings: {
       "https://deno.land/x/nifty_lil_tricks_testing/mod.ts": {
         name: "@nifty-lil-tricks/testing",

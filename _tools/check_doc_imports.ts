@@ -20,6 +20,10 @@ const EXCLUDED_PATHS = [
   "scripts",
   "sandbox",
 ];
+const ALLOWED_EXTERNAL_DEPS = [
+  "https://deno.land/x/postgres@v0.17.0/",
+  "npm:@nestjs/common@^10.2.7",
+];
 
 const ROOT = new URL("../", import.meta.url);
 const ROOT_LENGTH = ROOT.pathname.slice(0, -1).length;
@@ -52,8 +56,8 @@ function checkImportStatements(
     const isInternal = importPath.startsWith(
       "https://deno.land/x/nifty_lil_tricks_testing/",
     );
-    const isAllowedExternalDep = importPath.startsWith(
-      "https://deno.land/x/postgres@v0.17.0/",
+    const isAllowedExternalDep = ALLOWED_EXTERNAL_DEPS.some((dep) =>
+      importPath.startsWith(dep)
     );
     const isStdLib = importPath.startsWith("https://deno.land/std/");
     const { line } = sourceFile.getLineAndCharacterOfPosition(
