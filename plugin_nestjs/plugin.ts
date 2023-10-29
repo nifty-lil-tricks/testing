@@ -19,10 +19,6 @@ import {
   TestingModuleBuilder,
 } from "npm:@nestjs/testing@^10.2.7";
 
-// TODO: docstrings
-// TODO: examples
-// TODO: readme
-
 class PluginFactory {
   public create(): NestJsPlugin {
     return {
@@ -103,11 +99,247 @@ class PluginFactory {
 
 /**
  * The NestJS Plugin.
+ *
+ * **Basic server setup:**
+ * @example
+ * ```ts
+ * import {
+ *   setupTestsFactory,
+ * } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import {
+ *   nestJsPlugin,
+ *   type PluginConfig,
+ * } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_nestjs/mod.ts";
+ * import { Controller, Get, Module } from "npm:@nestjs/common@^10.2.7";
+ *
+ * // In another file, load plugins as follows to generate a setupTests function:
+ * const { setupTests } = setupTestsFactory({ server: nestJsPlugin });
+ *
+ * // In another file, define a NestJS app as follows:
+ *
+ * // Uncomment
+ * //@Controller()
+ * export class BasicAppController {
+ *   // Uncomment
+ *   //@Get("/hello")
+ *   getHello(): string {
+ *     return "Hello, world!";
+ *   }
+ * }
+ *
+ * // Uncomment
+ * //@Module({
+ * //  imports: [],
+ * //  controllers: [BasicAppController],
+ * //})
+ * export class BasicAppModule {}
+ *
+ * // Setup NestJS app for testing
+ * const { teardownTests, outputs } = await setupTests({
+ *   server: {
+ *     appModule: BasicAppModule,
+ *   } as PluginConfig,
+ * });
+ * const { origin } = outputs.server.output;
+ *
+ * // Test NestJS app and do work
+ * const response = await fetch(new URL("/hello", origin));
+ *
+ * // Teardown tests to restore environment after tests have run
+ * await teardownTests();
+ * ```
+ *
+ * **Basic server setup with overrides:**
+ * @example
+ * ```ts
+ * import {
+ *   setupTestsFactory,
+ * } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import {
+ *   nestJsPlugin,
+ *   type PluginConfig,
+ * } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_nestjs/mod.ts";
+ * import { Controller, Get, Module } from "npm:@nestjs/common@^10.2.7";
+ *
+ * // In another file, load plugins as follows to generate a setupTests function:
+ * const { setupTests } = setupTestsFactory({ server: nestJsPlugin });
+ *
+ * // In another file, define a NestJS app as follows:
+ *
+ * // Uncomment
+ * //@Controller()
+ * export class BasicAppController {
+ *   // Uncomment
+ *   //@Get("/hello")
+ *   getHello(): string {
+ *     return "Hello, world!";
+ *   }
+ * }
+ *
+ * // Uncomment
+ * //@Module({
+ * //  imports: [],
+ * //  controllers: [BasicAppController],
+ * //})
+ * export class BasicAppModule {}
+ *
+ * // Uncomment // In another file, define a NestJS app overrides for testing as follows:
+ * //@Controller()
+ * class NewAppController {
+ *   // Uncomment
+ *   //@Get("/hello")
+ *   getHello(): string {
+ *     return "Ahoy!";
+ *   }
+ * }
+ *
+ * // Uncomment
+ * //@Module({
+ * //  controllers: [NewAppController],
+ * //})
+ * class NewModule {}
+ *
+ * // Setup NestJS app for testing
+ * const { teardownTests, outputs } = await setupTests({
+ *   server: {
+ *     appModule: BasicAppModule,
+ *     modules: [{
+ *        moduleToOverride: BasicAppModule,
+ *        newModule: NewModule,
+ *      }],
+ *   } as PluginConfig,
+ * });
+ * const { origin } = outputs.server.output;
+ *
+ * // Test NestJS app and do work
+ * const response = await fetch(new URL("/hello", origin));
+ *
+ * // Teardown tests to restore environment after tests have run
+ * await teardownTests();
+ * ```
  */
 export const nestJsPlugin = new PluginFactory().create();
 
 /**
  * The NestJS Plugin.
+ *
+ * **Basic server setup:**
+ * @example
+ * ```ts
+ * import {
+ *   setupTestsFactory,
+ * } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import {
+ *   nestJsPlugin,
+ *   type PluginConfig,
+ * } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_nestjs/mod.ts";
+ * import { Controller, Get, Module } from "npm:@nestjs/common@^10.2.7";
+ *
+ * // In another file, load plugins as follows to generate a setupTests function:
+ * const { setupTests } = setupTestsFactory({ server: nestJsPlugin });
+ *
+ * // In another file, define a NestJS app as follows:
+ *
+ * // Uncomment
+ * //@Controller()
+ * export class BasicAppController {
+ *   // Uncomment
+ *   //@Get("/hello")
+ *   getHello(): string {
+ *     return "Hello, world!";
+ *   }
+ * }
+ *
+ * // Uncomment
+ * //@Module({
+ * //  imports: [],
+ * //  controllers: [BasicAppController],
+ * //})
+ * export class BasicAppModule {}
+ *
+ * // Setup NestJS app for testing
+ * const { teardownTests, outputs } = await setupTests({
+ *   server: {
+ *     appModule: BasicAppModule,
+ *   } as PluginConfig,
+ * });
+ * const { origin } = outputs.server.output;
+ *
+ * // Test NestJS app and do work
+ * const response = await fetch(new URL("/hello", origin));
+ *
+ * // Teardown tests to restore environment after tests have run
+ * await teardownTests();
+ * ```
+ *
+ * **Basic server setup with overrides:**
+ * @example
+ * ```ts
+ * import {
+ *   setupTestsFactory,
+ * } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import {
+ *   nestJsPlugin,
+ *   type PluginConfig,
+ * } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_nestjs/mod.ts";
+ * import { Controller, Get, Module } from "npm:@nestjs/common@^10.2.7";
+ *
+ * // In another file, load plugins as follows to generate a setupTests function:
+ * const { setupTests } = setupTestsFactory({ server: nestJsPlugin });
+ *
+ * // In another file, define a NestJS app as follows:
+ *
+ * // Uncomment
+ * //@Controller()
+ * export class BasicAppController {
+ *   // Uncomment
+ *   //@Get("/hello")
+ *   getHello(): string {
+ *     return "Hello, world!";
+ *   }
+ * }
+ *
+ * // Uncomment
+ * //@Module({
+ * //  imports: [],
+ * //  controllers: [BasicAppController],
+ * //})
+ * export class BasicAppModule {}
+ *
+ * // Uncomment // In another file, define a NestJS app overrides for testing as follows:
+ * //@Controller()
+ * class NewAppController {
+ *   // Uncomment
+ *   //@Get("/hello")
+ *   getHello(): string {
+ *     return "Ahoy!";
+ *   }
+ * }
+ *
+ * // Uncomment
+ * //@Module({
+ * //  controllers: [NewAppController],
+ * //})
+ * class NewModule {}
+ *
+ * // Setup NestJS app for testing
+ * const { teardownTests, outputs } = await setupTests({
+ *   server: {
+ *     appModule: BasicAppModule,
+ *     modules: [{
+ *        moduleToOverride: BasicAppModule,
+ *        newModule: NewModule,
+ *      }],
+ *   } as PluginConfig,
+ * });
+ * const { origin } = outputs.server.output;
+ *
+ * // Test NestJS app and do work
+ * const response = await fetch(new URL("/hello", origin));
+ *
+ * // Teardown tests to restore environment after tests have run
+ * await teardownTests();
+ * ```
  */
 export interface PluginConfig {
   /**
@@ -116,57 +348,123 @@ export interface PluginConfig {
   appModule: ClassType;
 
   /**
-   * The application providers to override.
+   * The application providers to override. If not provided, no providers will be overridden.
    */
   providers?: ProviderOverride[];
   /**
-   * The application modules to override.
+   * The application modules to override. If not provided, no modules will be overridden.
    */
   modules?: ModuleOverride[];
 }
 
+/**
+ * The Module Override options.
+ */
 export interface ModuleOverride {
+  /**
+   * The module definition to override.
+   */
   moduleToOverride: ModuleDefinition;
+  /**
+   * The new module definition to use instead.
+   */
   newModule: ModuleDefinition;
 }
 
+/**
+ * The Module Definition.
+ */
 export type ModuleDefinition =
   | ForwardReference
   | Type<unknown>
   | DynamicModule
   | Promise<DynamicModule>;
 
+/**
+ * The Provider Override options.
+ */
 export type ProviderOverride =
   | ProviderOverrideValue
   | ProviderOverrideFactory
   | ProviderOverrideClass;
 
+/**
+ * The Provider Override type.
+ */
 export const ProviderOverrideType = {
+  /**
+   * The provider override type by value.
+   */
   VALUE: "VALUE",
+  /**
+   * The provider override type by factory.
+   */
   FACTORY: "FACTORY",
+  /**
+   * The provider override type by class.
+   */
   CLASS: "CLASS",
 } as const;
 export type ProviderOverrideType =
   typeof ProviderOverrideType[keyof typeof ProviderOverrideType];
 
+/**
+ * The Provider Override by value options.
+ */
 export interface ProviderOverrideValue {
+  /**
+   * The provider override type.
+   */
   type: typeof ProviderOverrideType["VALUE"];
+  /**
+   * The provider type or token that is used to identify which provider to override.
+   */
   typeOrToken: unknown;
+  /**
+   * The value to use instead of the provider.
+   */
   useValue: unknown;
 }
 
+/**
+ * The Provider Override by factory options.
+ */
 export interface ProviderOverrideFactory {
+  /**
+   * The provider override type.
+   */
   type: typeof ProviderOverrideType["FACTORY"];
+  /**
+   * The provider type or token that is used to identify which provider to override.
+   */
   typeOrToken: unknown;
+  /**
+   * The factory to use instead of the provider.
+   */
   useFactory: OverrideByFactoryOptions;
 }
 
+/**
+ * The Provider Override by class options.
+ */
 export interface ProviderOverrideClass {
+  /**
+   * The provider override type.
+   */
   type: typeof ProviderOverrideType["CLASS"];
+  /**
+   * The provider type or token that is used to identify which provider to override.
+   */
   typeOrToken: unknown;
+  /**
+   * The class to use instead of the provider.
+   */
   useClass: ClassType;
 }
 
+/**
+ * The class type contract.
+ */
 export type ClassType<T = unknown> = new (...args: unknown[]) => T;
 
 /**

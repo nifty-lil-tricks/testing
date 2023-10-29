@@ -1,6 +1,6 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
 import {
   afterAll,
   afterEach,
@@ -8,7 +8,7 @@ import {
   beforeEach,
   describe,
   it,
-} from "https://deno.land/std@0.192.0/testing/bdd.ts";
+} from "https://deno.land/std/testing/bdd.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,

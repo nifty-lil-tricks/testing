@@ -1,7 +1,7 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { expandGlob } from "https://deno.land/std@0.194.0/fs/expand_glob.ts";
-import { basename } from "https://deno.land/std@0.194.0/path/mod.ts";
+import { expandGlob } from "https://deno.land/std/fs/expand_glob.ts";
+import { basename } from "https://deno.land/std/path/mod.ts";
 import { Client } from "./client.ts";
 import {
   MigrationOrderBy,
