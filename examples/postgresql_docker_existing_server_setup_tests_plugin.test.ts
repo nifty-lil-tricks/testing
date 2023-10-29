@@ -1,6 +1,6 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
 import {
   afterAll,
   afterEach,
@@ -8,18 +8,18 @@ import {
   beforeEach,
   describe,
   it,
-} from "https://deno.land/std@0.192.0/testing/bdd.ts";
+} from "https://deno.land/std/testing/bdd.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 import {
   MigrationStrategy,
   type PluginConfig,
   postgreSqlPlugin,
   Server,
   ServerStrategy,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 import { dirname, fromFileUrl } from "std/path/mod.ts";
 

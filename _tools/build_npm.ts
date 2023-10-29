@@ -47,7 +47,7 @@ for (const pkg of filteredPackages) {
     outDir: pkg.outDir,
     shims: {
       deno: true,
-      crypto: true,
+      ...pkg.shims,
     },
     rootTestDir: pkg.dir,
     testPattern: "*.test.ts",
@@ -150,11 +150,11 @@ async function adjustFileImports(pkg: Package): Promise<void> {
     let newContents = contents;
     ([
       [
-        '} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts',
+        '} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts',
         '} from "@nifty-lil-tricks/testing',
       ],
       [
-        `} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/${
+        `} from "https://deno.land/x/nifty_lil_tricks_testing/${
           basename(pkg.dir)
         }/mod.ts`,
         `} from "${pkg.name}`,

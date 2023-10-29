@@ -1,10 +1,10 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { assertRejects } from "https://deno.land/std@0.160.0/testing/asserts.ts";
+import { assertRejects } from "https://deno.land/std/testing/asserts.ts";
 import {
   setupTestsFactory,
   type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 import { expandGlob } from "std/fs/expand_glob.ts";
 import { dirname, fromFileUrl, join } from "std/path/mod.ts";
 import { afterEach, beforeEach, describe, it } from "std/testing/bdd.ts";

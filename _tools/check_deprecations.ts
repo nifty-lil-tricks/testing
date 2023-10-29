@@ -18,6 +18,8 @@ const EXCLUDED_PATHS = [
   "scripts",
   "sandbox",
   "plugin_postgresql/client.ts",
+  "examples/nestjs_.+test.ts",
+  "plugin_nestjs",
 ];
 
 const ROOT = new URL("../", import.meta.url);

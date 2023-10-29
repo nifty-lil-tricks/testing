@@ -2,7 +2,7 @@
 
 import type {
   PluginInstance,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 import {
   type Connection,
   Server,

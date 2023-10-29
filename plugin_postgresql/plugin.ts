@@ -5,7 +5,7 @@ import {
   type Plugin,
   type PluginInstance,
   type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 import {
   DatabaseConfig,
   DatabaseOutput,
@@ -168,8 +168,8 @@ class PluginFactory {
  * **Basic server setup:**
  * @example
  * ```ts
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, type PluginConfig, ServerStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
@@ -188,8 +188,8 @@ class PluginFactory {
  * **Existing server setup:**
  * @example
  * ```ts
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, type PluginConfig, Server } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, Server } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
@@ -215,8 +215,8 @@ class PluginFactory {
  * @example
  * ```ts
  * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
  *
  * const root = dirname(fromFileUrl(import.meta.url));
  *
@@ -239,8 +239,8 @@ class PluginFactory {
  * @example
  * ```ts
  * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
  *
  * const root = dirname(fromFileUrl(import.meta.url));
  *
@@ -269,8 +269,8 @@ class PluginFactory {
  * @example
  * ```ts
  * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
  *
  * const root = dirname(fromFileUrl(import.meta.url));
  *
@@ -300,8 +300,8 @@ class PluginFactory {
  * @example
  * ```ts
  * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, type PluginConfig, Server, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, Server, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
  *
  * const root = dirname(fromFileUrl(import.meta.url));
  *
@@ -342,8 +342,8 @@ export const postgreSqlPlugin = new PluginFactory().create();
  * **Basic server setup:**
  * @example
  * ```ts
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, type PluginConfig, ServerStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
@@ -362,8 +362,8 @@ export const postgreSqlPlugin = new PluginFactory().create();
  * **Existing server setup:**
  * @example
  * ```ts
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, type PluginConfig, Server } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, Server } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
  *
  * const { setupTests } = setupTestsFactory({ database: postgreSqlPlugin });
  *
@@ -389,8 +389,8 @@ export const postgreSqlPlugin = new PluginFactory().create();
  * @example
  * ```ts
  * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
  *
  * const root = dirname(fromFileUrl(import.meta.url));
  *
@@ -413,8 +413,8 @@ export const postgreSqlPlugin = new PluginFactory().create();
  * @example
  * ```ts
  * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
  *
  * const root = dirname(fromFileUrl(import.meta.url));
  *
@@ -443,8 +443,8 @@ export const postgreSqlPlugin = new PluginFactory().create();
  * @example
  * ```ts
  * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, ServerStrategy, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
  *
  * const root = dirname(fromFileUrl(import.meta.url));
  *
@@ -474,8 +474,8 @@ export const postgreSqlPlugin = new PluginFactory().create();
  * @example
  * ```ts
  * import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
- * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
- * import { postgreSqlPlugin, type PluginConfig, Server, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/plugin_postgresql/mod.ts";
+ * import { setupTestsFactory } from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
+ * import { postgreSqlPlugin, type PluginConfig, Server, MigrationStrategy } from "https://deno.land/x/nifty_lil_tricks_testing/plugin_postgresql/mod.ts";
  *
  * const root = dirname(fromFileUrl(import.meta.url));
  *

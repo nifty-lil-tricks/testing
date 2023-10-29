@@ -1,16 +1,16 @@
 // Copyright 2023-2023 the Nifty li'l' tricks authors. All rights reserved. MIT license.
 
-import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
 import {
   afterEach,
   beforeEach,
   describe,
   it,
-} from "https://deno.land/std@0.192.0/testing/bdd.ts";
+} from "https://deno.land/std/testing/bdd.ts";
 import {
   setupTestsFactory,
   SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 
 // Define or import a plugin as follows:
 const helloWorldPlugin = {

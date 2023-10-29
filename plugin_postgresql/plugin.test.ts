@@ -4,7 +4,7 @@ import {
   setupTestsFactory,
   type SetupTestsFn,
   type SetupTestsTeardown,
-} from "https://deno.land/x/nifty_lil_tricks_testing@__VERSION__/mod.ts";
+} from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 import { dirname, fromFileUrl, join } from "std/path/mod.ts";
 import { assertRejects } from "std/testing/asserts.ts";
 import {
