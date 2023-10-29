@@ -1,3 +1,8 @@
+### 0.5.0 / 2023.10.29
+
+- Add NestJS plugin (#22)
+- Refine releases file (#20)
+
 ### 0.4.0 / 2023.10.26
 
 - Add extra options and database creation support (#17)
