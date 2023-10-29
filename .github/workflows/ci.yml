@@ -49,7 +49,7 @@ jobs:
         shell: bash
         # excludes tests, testdata, and generated sources from coverage report
         run: |
-          deno coverage ./cov/ --lcov --exclude="test\\.(ts|js)|wasm\\.js|testdata" > cov.lcov
+          deno coverage ./cov/ --lcov --exclude="test\\.(ts|js)|wasm\\.js|testdata|fixtures" > cov.lcov
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
