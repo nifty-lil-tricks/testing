@@ -25,6 +25,21 @@ import * as testing from "https://deno.land/x/nifty_lil_tricks_testing/mod.ts";
 npm install @nifty-lil-tricks/testing
 ```
 
+### TypeScript
+
+The TypeScript `tsconfig.json` must contain the following recommended settings:
+
+```jsonc
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "strict": true
+  }
+}
+```
+
+Note, check the plugin READMEs for any additional TypeScript settings.
+
 ## Features
 
 The following features are supported

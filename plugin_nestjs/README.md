@@ -25,6 +25,21 @@ import { nestJsPlugin } from "https://deno.land/x/nifty_lil_tricks_testing/plugi
 npm install @nifty-lil-tricks/testing-plugin-nestjs
 ```
 
+### TypeScript
+
+The TypeScript `tsconfig.json` must contain the following recommended settings:
+
+```jsonc
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "strict": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
+  }
+}
+```
+
 ## Features
 
 The following features are supported:
