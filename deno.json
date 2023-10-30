@@ -35,6 +35,7 @@
     "clean": "rm -rf ./cov && rm -rf ./html_cov && rm -rf ./npm",
     "check": "deno check *.ts examples/*.ts plugin_*/**/*.ts",
     "test:examples": "deno test --parallel --doc --allow-all examples/*.ts",
+    "test:examples:nodejs": "cd examples/nifty-lil-tricks-testing-nodejs && npm install && npm test",
     "test": "deno test --parallel --doc --allow-all --coverage=./cov",
     "test:all": "deno task test && deno task test:examples",
     "test:browser": "git grep --name-only \"This module is browser compatible.\" | grep -v deno.json | grep -v .github/workflows | grep -v _tools | xargs deno check --config browser-compat.tsconfig.json",

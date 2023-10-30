@@ -25,6 +25,19 @@ import { postgreSqlPlugin } from "https://deno.land/x/nifty_lil_tricks_testing/p
 npm install @nifty-lil-tricks/testing-plugin-postgresql
 ```
 
+### TypeScript
+
+The TypeScript `tsconfig.json` must contain the following recommended settings:
+
+```jsonc
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "strict": true
+  }
+}
+```
+
 ## Features
 
 The following features are supported
