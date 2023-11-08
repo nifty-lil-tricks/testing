@@ -1,3 +1,7 @@
+### 0.6.0 / 2023.11.08
+
+- Add extra examples for Node.js (#24)
+
 ### 0.5.0 / 2023.10.29
 
 - Add NestJS plugin (#22)
