@@ -119,6 +119,8 @@ jobs:
     if: |
       github.repository == 'nifty-lil-tricks/testing' &&
       github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
     steps:
       - name: Clone repository
         uses: actions/checkout@v3
