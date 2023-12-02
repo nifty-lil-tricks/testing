@@ -1,3 +1,9 @@
+### 0.6.0 / 2023.12.02
+
+- Add extra examples for Node.js (#24)
+- Add permissions to CI/CD (#27)
+- Migrate repo (#26)
+
 ### 0.5.0 / 2023.10.29
 
 - Add NestJS plugin (#22)
