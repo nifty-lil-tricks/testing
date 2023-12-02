@@ -12,7 +12,7 @@ git config core.hooksPath .githooks
 
 ## Install Deno
 
-> **Note:** This project uses Deno version >= 1.37.x
+> **Note:** This project uses Deno version >= 1.38.x
 
 ### Via asdf
 
@@ -55,6 +55,15 @@ To check report, run the following:
 
 ```sh
 deno task report
+```
+
+## Cache
+
+Deno uses a cache as defined here. Sometimes, this can get out of sync with the
+latest available dependencies. To reload the cache, run the following:
+
+```sh
+deno task reload
 ```
 
 ## Release Process
