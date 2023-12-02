@@ -61,12 +61,12 @@ for (const pkg of filteredPackages) {
       license: "MIT",
       repository: {
         type: "git",
-        url: "git+https://github.com/jonnydgreen/nifty-lil-tricks-testing.git",
+        url: "git+https://github.com/nifty-lil-tricks/testing.git",
       },
       bugs: {
-        url: "https://github.com/jonnydgreen/nifty-lil-tricks-testing/issues",
+        url: "https://github.com/nifty-lil-tricks/testing/issues",
       },
-      homepage: "https://github.com/jonnydgreen/nifty-lil-tricks-testing",
+      homepage: "https://github.com/nifty-lil-tricks/testing",
       keywords: [
         "testing",
         "deno",
