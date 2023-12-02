@@ -1,11 +1,13 @@
+![Nifty li'l tricks Logo](https://raw.githubusercontent.com/nifty-lil-tricks/assets/main/nifty-lil-tricks-logo.png)
+
 # nifty_lil_tricks_testing
 
 **Note: this package and selected plugins are currently a work in progress**
 
 [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing)
-[![GitHub License](https://img.shields.io/github/license/jonnydgreen/nifty-lil-tricks-testing?style=flat-square)](https://raw.githubusercontent.com/jonnydgreen/nifty-lil-tricks-testing/main/LICENSE)
-[![Buy us a tree](https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen)](https://plant.treeware.earth/jonnydgreen/nifty-lil-tricks-testing)
-[![codecov](https://codecov.io/gh/jonnydgreen/nifty-lil-tricks-testing/branch/main/graph/badge.svg)](https://codecov.io/gh/jonnydgreen/nifty-lil-tricks-testing)
+[![GitHub License](https://img.shields.io/github/license/nifty-lil-tricks/testing?style=flat-square)](https://raw.githubusercontent.com/nifty-lil-tricks/testing/main/LICENSE)
+[![Buy us a tree](https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen)](https://plant.treeware.earth/nifty-lil-tricks/testing)
+[![codecov](https://codecov.io/gh/nifty-lil-tricks/testing/branch/main/graph/badge.svg)](https://codecov.io/gh/nifty-lil-tricks/testing)
 
 A selection of useful utilities (or nifty li'l tricks!) for all things testing.
 
@@ -55,11 +57,11 @@ The following features are supported
 The following plugins are available to that make use of the setup tests plugin
 system.
 
-| Plugin                                                                                                       | Description                                                                                                                                                                                                                                                                                                                                                                                 | Status | Npm                                                                                                                                                                                        | Docs                                                                                                   |
-| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| [PostgreSQl](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_postgresql/README.md)  | Setup the World's Most Advanced Open Source Relational Database for testing. It has the following features: <br><ul><li>Setup a Postgresql server in [Docker](https://www.docker.com/) for testing.</li><li>Setup an existing Postgresql server for testing.</li><li>Run migrations on the configured Postgresql server.</li><li>Seed the configured Postgresql server with data.</li></ul> | ✅     | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-postgresql?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-postgresql) | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_postgresql/README.md). |
-| [NestJS Server](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_nestjs/README.md)   | Setup a progressive Node.js framework for building efficient, reliable and scalable server-side applications for testing.                                                                                                                                                                                                                                                                   | ✅     | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-nestjs?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-nestjs)         | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_nestjs/README.md)      |
-| [Express Server](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_express/README.md) | Setup a minimal and flexible Node.js web Express application for testing.                                                                                                                                                                                                                                                                                                                   | 🚧     | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-express?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-express)       | [Docs](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/plugin_express/README.md)     |
+| Plugin                                                                                           | Description                                                                                                                                                                                                                                                                                                                                                                                 | Status | Npm                                                                                                                                                                                        | Docs                                                                                       |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| [PostgreSQl](https://github.com/nifty-lil-tricks/testing/blob/main/plugin_postgresql/README.md)  | Setup the World's Most Advanced Open Source Relational Database for testing. It has the following features: <br><ul><li>Setup a Postgresql server in [Docker](https://www.docker.com/) for testing.</li><li>Setup an existing Postgresql server for testing.</li><li>Run migrations on the configured Postgresql server.</li><li>Seed the configured Postgresql server with data.</li></ul> | ✅     | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-postgresql?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-postgresql) | [Docs](https://github.com/nifty-lil-tricks/testing/blob/main/plugin_postgresql/README.md). |
+| [NestJS Server](https://github.com/nifty-lil-tricks/testing/blob/main/plugin_nestjs/README.md)   | Setup a progressive Node.js framework for building efficient, reliable and scalable server-side applications for testing.                                                                                                                                                                                                                                                                   | ✅     | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-nestjs?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-nestjs)         | [Docs](https://github.com/nifty-lil-tricks/testing/blob/main/plugin_nestjs/README.md)      |
+| [Express Server](https://github.com/nifty-lil-tricks/testing/blob/main/plugin_express/README.md) | Setup a minimal and flexible Node.js web Express application for testing.                                                                                                                                                                                                                                                                                                                   | 🚧     | [![Latest Version](https://img.shields.io/npm/v/@nifty-lil-tricks/testing-plugin-express?style=flat-square)](https://www.npmjs.com/package/@nifty-lil-tricks/testing-plugin-express)       | [Docs](https://github.com/nifty-lil-tricks/testing/blob/main/plugin_express/README.md)     |
 
 ### Setup tests
 
@@ -268,7 +270,7 @@ The API Docs can be found [here](https://deno.land/x/nifty_lil_tricks_testing).
 ## Examples
 
 Examples can be found
-[here](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/examples/).
+[here](https://github.com/nifty-lil-tricks/testing/blob/main/examples/).
 
 ## Support
 
@@ -282,27 +284,27 @@ Examples can be found
 ## Useful links
 
 - For help or feedback on this project, join us in
-  [GitHub Discussions](https://github.com/jonnydgreen/nifty-lil-tricks-testing/discussions)
+  [GitHub Discussions](https://github.com/nifty-lil-tricks/testing/discussions)
 
 ## License
 
 Nifty li'l tricks packages are 100% free and open-source, under the
-[MIT license](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/LICENSE).
+[MIT license](https://github.com/nifty-lil-tricks/testing/blob/main/LICENSE).
 
 This package is [Treeware](https://treeware.earth). If you use it in production,
 then we ask that you
-[**buy the world a tree**](https://plant.treeware.earth/jonnydgreen/nifty-lil-tricks-testing)
+[**buy the world a tree**](https://plant.treeware.earth/nifty-lil-tricks/testing)
 to thank us for our work. By contributing to the Treeware forest you’ll be
 creating employment for local families and restoring wildlife habitats.
 
 ## Contributions
 
-[Contributions](https://github.com/jonnydgreen/nifty-lil-tricks-testing/blob/main/CONTRIBUTING.md),
+[Contributions](https://github.com/nifty-lil-tricks/testing/blob/main/CONTRIBUTING.md),
 issues and feature requests are very welcome. If you are using this package and
 fixed a bug for yourself, please consider submitting a PR!
 
 <p align="center">
-  <a href="https://github.com/jonnydgreen/nifty-lil-tricks-testing/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=jonnydgreen/nifty-lil-tricks-testing&columns=8" />
+  <a href="https://github.com/nifty-lil-tricks/testing/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=nifty-lil-tricks/testing&columns=8" />
   </a>
 </p>

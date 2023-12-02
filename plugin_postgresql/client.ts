@@ -34,7 +34,7 @@ export class Client {
     return {
       query: queryText,
       args: values,
-      rowCount: result.rowCount,
+      rowCount: Number(result.rowCount),
       rows: result.rows,
     };
   }
